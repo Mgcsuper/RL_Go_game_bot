@@ -1,5 +1,5 @@
 import argparse
-from gym_go.envs_copy import go_env
+from gym_go.envs import go_env
 
 # Arguments
 parser = argparse.ArgumentParser(description='Demo Go Environment')
