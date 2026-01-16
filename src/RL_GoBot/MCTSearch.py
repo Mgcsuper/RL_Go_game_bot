@@ -1,8 +1,9 @@
 import torch
-from gym_go import gogame
+from gym_go import gogame, govars
 from RL_GoBot import var
 from RL_GoBot.model import GoBot
 from math import sqrt
+import random
 
 
 
@@ -45,142 +46,179 @@ def roll_policy(state, net, prt = False):
     if player :
         score = - score
     return score        # from the perspective of the player who where supposed to play at the starting state of the roll_policy
+ 
     
 
-class MCTS():
-    root_depth = 0
-    net : GoBot
 
-    def __init__(self, state, action : int, p : torch.Tensor, depth = 0):
-        self.next_nodes = []
+class Node:
+    def __init__(self, state, action: int, p: torch.Tensor, depth=0):
         self.state = state
         self.action = action
-        self.N = 0
-        self.Wv = 0 
-        self.Wr = 0 
-        self.Q = 0
         self.p = p
         self.depth = depth
+        self.end_game = self.next_state()[govars.DONE_CHNL,0,0]
+
+        self.N = 0
+        self.Wv = 0
+        self.Wr = 0
+        self.Q = 0
+
+        self.next_nodes = []
 
         self.first_search = True
         self.value = 0
         self.roll = 0
 
     def next_state(self):
-        if self.action == None :
+        if self.action is None:
             return self.state
-        else :
-            return gogame.next_state(self.state, self.action)
-    
+        return gogame.next_state(self.state, self.action)
+
     def action_2d(self):
-        if self.action == None :
+        if self.action is None:
             return "None"
-        else :
-            return self.action // var.BOARD_SIZE, self.action % var.BOARD_SIZE
+        return self.action // var.BOARD_SIZE, self.action % var.BOARD_SIZE
 
 
-    def exctend_tree(self):
-        # here the simulation of the accumulation of Wv and Wr will being just a leaf node
-        self.Wv = self.N * self.value
-        self.Wr = self.N * self.roll     
-        next_state = self.next_state()
-        result = MCTS.net([next_state]).result[0]
-        for i in range(var.BOARD_SIZE):
-            for j in range(var.BOARD_SIZE):
-                if next_state[3,i,j] == 1:
-                    p = 0
-                else : 
-                    p = max(var.EPSILON,result[i*var.BOARD_SIZE + j])
-                action = i*var.BOARD_SIZE + j
-                # adding the mouve at possition (i,j)
-                self.next_nodes.append(
-                    MCTS(next_state, 
-                        action, 
-                        p,
-                        self.depth + 1))
-        # adding the pass mouve
-        self.next_nodes.append(
-            MCTS(next_state, 
-                var.BOARD_SIZE**2, 
-                var.EPSILON,
-                self.depth + 1))
+    def update_Q(self):
+        # Calcul de Q à partir de Wv et Wr
+        if self.N > 0:
+            self.Q = ((1 - var.QU_RATIO) * self.Wv + var.QU_RATIO * self.Wr) / self.N
 
-
-    def push_search(self, prt = False):
-        if prt : print("self", self)
-        if self.N >= var.N_THRESHOLD :
-            if not self.next_nodes :    # extend node part
-                print("extende : ", self.action_2d(), self.depth)
-                self.exctend_tree()
-
-            max_score = 0      # all scores can be <0 so can be improved here (maybe take the score of the default pass mouve)
-            # max_score = self.next_nodes[-1].Q + c_puct * self.next_nodes[-1].p * sqrt(self.N)/(1+self.next_nodes[-1].N)
-            node_to_search = self.next_nodes[-1]    # default next mouve is the pass mouve (used if no mouves has a positive score)
-            if prt : print("___scores___")
-            for next_node in self.next_nodes :
-                score = next_node.Q + var.C_PUCT * next_node.p * sqrt(self.N)/(1+next_node.N)
-                if prt : print(score)
-                # print(score, next_node)
-                if score > max_score :
-                    max_score = score
-                    node_to_search = next_node
-            if prt : print("___scores_end___")
-            value, output = node_to_search.push_search(prt)
-            self.Wv += value  
-            self.Wr += output 
-            self.Q = ((1-var.QU_RATIO) * self.Wv + var.QU_RATIO * self.Wr)/self.N
-            
-
-        elif self.first_search :    # here self.Q is initialise and dont change the N_threshold first time but self.Wv and self.Wr should accumulate with is simulated in the extend node part
-            if prt : print("___first_search___")
-            self.first_search = False
-            next_state = self.next_state()
-            value = MCTS.net(next_state).value
-            if prt : print("__in_roll_out__")
-            output = roll_policy(next_state, MCTS.net, prt)
-            if prt : print("___first_search_end___")
-            
-            self.value = value
-            self.roll = output
-            self.Q = (1-var.QU_RATIO) * self.value + var.QU_RATIO * self.roll     # don't change value until the expend happen
-
-        else :
-            value = self.value
-            output = self.roll
-    
-        self.N += 1
-        return - value, - output
-    
-
-    def best_next_node(self):
-        max_visited_N = 0
-        i = 0
-        for next_node in self.next_nodes :
-            i += 1
-            visited_N = next_node.N
-            if visited_N > max_visited_N :
-                max_visited_N = visited_N
-                best_node = next_node
-        return best_node
-    
-
-    @staticmethod
-    def tree_policy(node):
-        actions = []
-        visited_N = []
-        for next_node in node.next_nodes :
-            actions.append(next_node.action)
-            visited_N.append(next_node.N)
-        diviseur = sum(N**(1/var.TEMPERATURE_MCTS) for N in visited_N)
-        sorted_index = sorted(range(len(actions)), key=lambda i : actions[i])
-        MCTS_policy = [visited_N[i]/diviseur for i in sorted_index]
-        return MCTS_policy
-    
     def __str__(self):
         print("___ node info ___")
         print("action : {} | depth : {}".format(self.action_2d(), self.depth))
-        print(self.N)
-        # print(self.state[3])
+        print("N : {}, P : {}".format(self.N, self.p))
+        print(self.state[3])
         return ' '
-        
 
+
+class MCTS:
+    def __init__(self, net: GoBot, root_node: Node, temperature = var.TEMPERATURE_MCTS):
+        self.root = root_node
+        self.net = net
+        self.temperature = temperature 
+        self.root_depth = 0
+        self.policy = None
+
+
+    def extend_node(self, node):
+        # print("\n -- extend --")
+        # Simulation de la création des enfants
+        node.Wv = node.N * node.value
+        node.Wr = node.N * node.roll
+        next_state = node.next_state()
+
+        # Prédiction du NN
+        result = self.net([next_state]).result[0]
+
+        # Mask des coups invalides et softmax
+        invalid_moves = gogame.invalid_moves(next_state)  # contain also the pass move
+        result[invalid_moves == 1] = float('-inf')
+        # print(result[:-1].view(7,7))
+        # print(result[-1])
+        prior_probs = torch.softmax(result, dim=-1)
+        # print(prior_probs[:-1].view(7,7))
+        # print(prior_probs[-1])
+
+        for action, p in enumerate(prior_probs):
+            if p != 0 : 
+                node.next_nodes.append(Node(
+                    next_state,
+                    action,
+                    p,
+                    node.depth + 1
+                ))
+        # print(len(node.next_nodes))
+
+
+    def push_search(self, node: Node, prt=False):
+        # Cas de la première exploration
+        if node.first_search:
+            node.first_search = False
+            next_state = node.next_state()
+            node.value = self.net(next_state).value
+            node.roll = roll_policy(next_state, self.net, prt)
+            node.Q = (1 - var.QU_RATIO) * node.value + var.QU_RATIO * node.roll
+        
+        if node.end_game:
+            node.N += 1
+            return -node.value, -node.roll
+
+        # Cas N >= threshold
+        if node.N >= var.N_THRESHOLD:
+            if not node.next_nodes:
+                self.extend_node(node)
+
+            # Sélection du next_node selon UCT
+            node_to_search = max(
+                node.next_nodes,
+                key=lambda n: n.Q + var.C_PUCT * n.p * sqrt(node.N) / (1 + n.N)
+            )
+            # qpu = [n.Q + var.C_PUCT * n.p * sqrt(node.N) / (1 + n.N) for n in node.next_nodes]
+            # print(qpu)
+            # print(node_to_search)
+
+            value, output = self.push_search(node_to_search, prt)
+            node.Wv += value
+            node.Wr += output
+            node.update_Q()
+
+        else:
+            value = node.value
+            output = node.roll
+
+        node.N += 1
+        return -value, -output
+
+
+    def best_next_node(self):
+        """Retourne l'enfant avec le plus grand nombre de visites N"""
+        if not self.root.next_nodes:
+            print("Error : No policy is possible without expending this node")
+            return None
+        best_node = max(self.root.next_nodes, key=lambda n: n.N)
+        return best_node
+    
+
+    def next_node(self):
+        """Échantillonne un enfant selon la policy"""
+        if self.policy is None:
+            self.tree_policy()
+            
+        r = random.random()
+        self.affiche_policy()
+        print("r : ", r)
+        cumulative = 0
+        for node in self.root.next_nodes:
+            cumulative += self.policy[node.action]
+            if cumulative > r:
+                print("action : ", node.action)
+                self.policy = None
+                return node
+
+        self.policy = None
+        # Au cas où la somme n'est pas exactement 1 à cause des flottants
+        return self.next_nodes[-1]
+    
+
+    def tree_policy(self):
+        visited_N = [0 for i in range(var.BOARD_SIZE**2 + 1)]
+        for node in self.root.next_nodes:
+            visited_N[node.action] = node.N
+
+        visited_N_temperated = [N**(1 / self.temperature) for N in visited_N]
+        diviseur = sum(visited_N_temperated)
+        self.policy = [N / diviseur for N in visited_N_temperated]
+        return self.policy
+
+
+    def affiche_policy(self):
+        tensor = torch.tensor(self.policy[:-1])      # tensor 1D
+        tensor_7x7 = tensor.view(7, 7)  
+        print("policy : ", tensor_7x7)
+        print("pass : ", self.policy[-1])
+
+    def __str__(self):
+        print(self.root)
+        return ' '

@@ -1,8 +1,8 @@
 from RL_GoBot import var
 from config import MODEL_DIR
 import torch
+import os
 
-print(var.BOARD_SIZE)
 
 class OutputFormating(torch.Tensor):
     @property
@@ -52,8 +52,11 @@ class GoBot(torch.nn.Module):
     if x.ndim == 3: 
         x = x.unsqueeze(0)
 
-    if x[:,2,0,0] == 1:
-      x[:, [0,1], ...] = x[:, [1,0], ...]
+    batch_size = x.shape[0]
+
+    for batch_idx in range(batch_size):
+        if x[batch_idx,2,0,0] == 1:
+            x[batch_idx, [0,1], ...] = x[batch_idx, [1,0], ...]
     
     x = x[:,[0,1,3,4],...]
     ##------##
@@ -78,5 +81,9 @@ class GoBot(torch.nn.Module):
   
 
   def load_model(self, file_name : str):
-     self.load_state_dict(torch.load(MODEL_DIR/file_name))
-     return
+      path = MODEL_DIR/file_name
+      if os.path.exists(path):
+          self.load_state_dict(torch.load(path))
+      else :
+          self.save_model(file_name)
+      return
