@@ -1,21 +1,29 @@
-BOARD_SIZE = 7
+BOARD_SIZE = 9
 KOMI = 0.5
 MAX_TURNS = 100 # a bit plus then the total number of position to play
 
 # MCTS variables
 C_PUCT = 5
-N_THRESHOLD = 10 
-N_TREE_SEARCH = 100
+N_THRESHOLD = 12 
+N_TREE_SEARCH = 200
 QU_RATIO = 0.5
 
-TEMPERATURE_MCTS = 2
+TEMPERATURE_MCTS = 1.6
+
+# MCTS parallele and batch variables
+MAX_PROCESSES = 1
+VIRTUAL_LOSS = 3
+
+ROLL_BATCH_SIZE = 8
+MAX_WAIT_TIME = 0.04
+MAX_QUEUE_SIZE = ROLL_BATCH_SIZE
 
 # training variables
 # DEVICE = 'cuda:0'
-EPOCHS = 10
+EPOCHS = 20
 MOMENTUM = 0.9
 LEARNING_RATE = 0.01
-BATCH_SIZE = 16
+BATCH_SIZE = 64
 
 # loss variables
 L2_LOSS = 0.00001

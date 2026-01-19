@@ -1,58 +1,27 @@
 import torch
-from gym_go import gogame, govars
+from typing import List
+import random
+from math import sqrt
+import numpy as np
+
+
+import queue
+
 from RL_GoBot import var
 from RL_GoBot.model import GoBot
-from math import sqrt
-import random
-from typing import List
+
+from gym_go import govars, gogame
 
 
-
-def action2d(action) :
-    return action // var.BOARD_SIZE, action % var.BOARD_SIZE 
-
-
-def roll_policy(state, net, prt = False):    
-    """
-    return :
-        the score of the outcome of the self played game seen by the first player to play
-    """
-    player = state[2,0,0]
-    game_ended = gogame.game_ended(state)
-
-    game_turns = 0
-    while not game_ended:
-        if game_turns < var.MAX_TURNS :
-            if torch.all(torch.tensor(state[3,:,:]) == 1):  # if there is no more legal mouves, the only move is pass
-                action = var.BOARD_SIZE**2      # pass move
-            else :
-                result = net([state]).result[0]
-                # print(result)
-                sorted_indices_actions = sorted(range(len(result)), key=lambda i: result[i])    # sort from the most willing move to play until the most unwilling move, by the actual policy
-                invalid_moves = gogame.invalid_moves(state)
-                for i in range(var.BOARD_SIZE**2+1) :
-                    action = sorted_indices_actions[i]
-                    if not invalid_moves[action] :  # check if it is a valide move
-                        break
-        else :
-            action = var.BOARD_SIZE**2
-        
-        # if prt : print(action2d(action))
-        # if prt : print(state)
-        state = gogame.next_state(state, action)
-        game_ended = gogame.game_ended(state)
-        game_turns += 1
-
-    score = gogame.winning(state, var.KOMI)  # from absolut black perspective
-    if player :
-        score = - score
-    return score        # from the perspective of the player who where supposed to play at the starting state of the roll_policy
- 
-    
 
 
 class Node:
-    def __init__(self, state, action: int, p: torch.Tensor, depth=0):
+    def __init__(self, state, action: int, parent: "Node", p: torch.Tensor, depth=0, root=False):
+        self.front_push = 0
+        self.back_probpagation = 0
+
+        self.root = root
+        self.parent = parent
         self.state = state
         self.action = action
         self.p = p
@@ -88,13 +57,16 @@ class Node:
 
     def __str__(self):
         print("___ node info ___")
-        print("action : {} | depth : {}".format(self.action_2d(), self.depth))
-        return "N : {}, P : {}".format(self.N, self.p)
+        print("action : {}".format(self.action_2d()))
+        # print("action : {} | depth : {}".format(self.action_2d(), self.depth))
+        # return "N : {}, P : {} \n".format(self.N, self.p)
+        return " "
 
 
 class MCTS:
     roll_policy_count = 0
-    def __init__(self, net: GoBot, root_node: Node, temperature = var.TEMPERATURE_MCTS):
+    def __init__(self, net: GoBot, task_queue : queue.Queue, root_node: Node, temperature = var.TEMPERATURE_MCTS):
+        self.task_queue = task_queue
         self.root = root_node
         self.net = net
         self.temperature = temperature 
@@ -102,75 +74,95 @@ class MCTS:
         self.policy = None
 
 
-    def extend_node(self, node):
-        # print("\n -- extend --")
-        # Simulation de la création des enfants
-        node.Wv = node.N * node.value
-        node.Wr = node.N * node.roll
+    def extend_node(self, node : Node):
+        # print("extend")
         next_state = node.next_state()
 
         # Prédiction du NN
-        result = self.net([next_state]).result[0]
+        result = self.net(next_state).result[0]
 
         # Mask des coups invalides et softmax
         invalid_moves = gogame.invalid_moves(next_state)  # contain also the pass move
         result[invalid_moves == 1] = float('-inf')
-        # print(result[:-1].view(7,7))
-        # print(result[-1])
         prior_probs = torch.softmax(result, dim=-1)
-        # print(prior_probs[:-1].view(7,7))
-        # print(prior_probs[-1])
 
         for action, p in enumerate(prior_probs):
             if p != 0 : 
                 node.next_nodes.append(Node(
                     next_state,
                     action,
+                    node,
                     p,
                     node.depth + 1
                 ))
-        # print(len(node.next_nodes))
 
 
-    def push_search(self, node: Node, prt=False):
+    def back_prob(self, node: Node, value, roll):
+        # print("back \n", node)
+        node.back_probpagation += 1
+
+        node.N += -var.VIRTUAL_LOSS + 1
+        node.Wr += 3 + roll
+        node.Wv += value
+        # node.Q = ((1 - var.QU_RATIO) * node.Wv + var.QU_RATIO * node.Wr) /node.N
+        node.update_Q()
+
+        if not node.root:       # we dont make the root Node parametters evolve 
+            self.back_prob(node.parent, -value, -roll)
+
+        return
+
+
+    def back_prob_leaf(self, node: Node, value, roll, count : int):
+        # print("count : ", count)
+
+        GoBot.forward_count += count
+        node.roll = roll
+        node.value = value
+        self.back_prob(node, value, roll)
+
+
+    def push_search(self, node: Node):
+        # print("___")
+        # print("push \n", node)
+        node.front_push += 1
+
+        node.N += var.VIRTUAL_LOSS
+        node.Wr -= 3
+
         # Cas de la première exploration
         if node.first_search:
-            MCTS.roll_policy_count += 1
+            # print("first")
             node.first_search = False
             next_state = node.next_state()
-            node.value = self.net(next_state).value
-            node.roll = roll_policy(next_state, self.net, prt)
-            node.Q = (1 - var.QU_RATIO) * node.value + var.QU_RATIO * node.roll
-        
-        if node.end_game:
-            node.N += 1
-            return -node.value, -node.roll
+            try:
+                self.task_queue.put((node, next_state))    # node.value = self.net(next_state).value  and   node.roll = roll_policy(next_state)
+                MCTS.roll_policy_count += 1
+                # print("put  ")
+            except queue.Full:
+                pass
+            
 
         # Cas N >= threshold
-        if node.N >= var.N_THRESHOLD:
+        elif node.N >= var.N_THRESHOLD and not node.end_game:
+            # print("> N")
             if not node.next_nodes:
                 self.extend_node(node)
 
-            # Sélection du next_node selon UCT
+            # Sélection du next_node 
             node_to_search = max(
                 node.next_nodes,
                 key=lambda n: n.Q + var.C_PUCT * n.p * sqrt(node.N) / (1 + n.N)
             )
-            # qpu = [n.Q + var.C_PUCT * n.p * sqrt(node.N) / (1 + n.N) for n in node.next_nodes]
-            # print(qpu)
-            # print(node_to_search)
+            self.push_search(node_to_search)
 
-            value, output = self.push_search(node_to_search, prt)
-            node.Wv += value
-            node.Wr += output
-            node.update_Q()
-
+        # Cas 1 <= N < threshold
         else:
-            value = node.value
-            output = node.roll
+            # print("midel")
+            self.back_prob(node, node.value, node.roll)
+        # print("_")
+        return
 
-        node.N += 1
-        return -value, -output
 
 
     def best_next_node(self):
@@ -189,12 +181,12 @@ class MCTS:
             
         r = random.random()
         self.affiche_policy()
-        print("r : ", r)
+        print("r : ", r, flush=True)
         cumulative = 0
         for node in self.root.next_nodes:
             cumulative += self.policy[node.action]
             if cumulative > r:
-                print("action : ", node.action_2d())
+                print("action : ", node.action_2d(), flush=True)
                 self.policy = None
                 return node
 
@@ -205,10 +197,16 @@ class MCTS:
 
     def tree_policy(self):
         visited_N = [0 for i in range(var.BOARD_SIZE**2 + 1)]
+        count_front = [0 for i in range(var.BOARD_SIZE**2 + 1)]
+        count_back = [0 for i in range(var.BOARD_SIZE**2 + 1)]
         for node in self.root.next_nodes:
             visited_N[node.action] = node.N
+            count_front[node.action] = node.front_push
+            count_back[node.action] = node.back_probpagation
 
         self.count_branch_visit = visited_N  # juste pour de l'affichage
+        self.count_front = count_front
+        self.count_back = count_back
 
         visited_N_temperated = [N**(1 / self.temperature) for N in visited_N]
         diviseur = sum(visited_N_temperated)
@@ -218,11 +216,20 @@ class MCTS:
 
     def affiche_policy(self):
         tensor = torch.tensor(self.count_branch_visit[:-1])      # tensor 1D
-        tensor_2d = tensor.view(var.BOARD_SIZE, var.BOARD_SIZE)  
+        front = torch.tensor(self.count_front[:-1])      # tensor 1D
+        back = torch.tensor(self.count_back[:-1])      # tensor 1D
+        print("count mismatch : ", var.BOARD_SIZE**2 + 1 - np.count_nonzero(np.array(self.count_front) == np.array(self.count_back)))
 
-        print("- tree policy info -")
-        print("policy : ", tensor_2d)
-        print("pass : ", self.count_branch_visit[-1])
+        tensor_2d = tensor.view(var.BOARD_SIZE, var.BOARD_SIZE)
+        front2d = front.view(var.BOARD_SIZE, var.BOARD_SIZE)
+        back2d = back.view(var.BOARD_SIZE, var.BOARD_SIZE)
+
+        print("- tree policy info -", flush=True)
+        print("policy : ", tensor_2d, flush=True)
+        # print("front :", front2d, flush=True)
+        # print("back :", back2d, flush=True)
+        print("pass : ", self.count_branch_visit[-1], flush=True)
 
     def __str__(self):
         return self.root.__str__()
+

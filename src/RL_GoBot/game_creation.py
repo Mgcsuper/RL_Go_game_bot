@@ -1,5 +1,6 @@
 import torch
 import time
+from RL_GoBot.model import GoBot
 from RL_GoBot.MCTSearch import MCTS, Node
 from RL_GoBot import var
 from RL_GoBot.data_base import GoDatabase
@@ -14,7 +15,8 @@ def one_self_play_MCTS(net):
         root_node = Node(state, None, 1)
         tree = MCTS(net, root_node)
         while not gogame.game_ended(state) : 
-            print("new root \n", tree)
+            
+            print("\n - new root - \n", tree)
             tmp = time.time()
             
             for _ in range(var.N_TREE_SEARCH) : 
@@ -22,16 +24,19 @@ def one_self_play_MCTS(net):
             MCTS_policy = tree.tree_policy()
             data_set.append([state, MCTS_policy])
         
+            print("- general tree time and process info -")
+            print("nomber of rollout : ", MCTS.roll_policy_count)
+            print("nomber of forward : ", GoBot.forward_count)
+            print("time for this move : ", time.time() - tmp)
+
             next_root = tree.next_node()
             next_state = gogame.next_state(state, next_root.action)
             tree.root = next_root
             state = next_state
-            print("\n", time.time() - tmp)
+            MCTS.roll_policy_count = 0
+            GoBot.forward_count = 0
 
     reward = gogame.winning(state, var.KOMI)
-    # black_area, white_area = gogame.areas(state)
-    # if data_set[0,0][2,0,0] == 1:   # if the first to play is white (nevers happen)
-    #     reward = -reward
     for move in data_set:
         move.append(reward)
         reward = -reward
@@ -39,8 +44,7 @@ def one_self_play_MCTS(net):
     return data_set
 
 
-def self_play_MCTS(N, net, db : GoDatabase):
-    # data = []
+def self_play_MCTS(N, net, db : GoDatabase):    # obliged when playing mor then one game to save them somewhere
     for i in range(N):
         tmp_total = time.time()
         game_moves = one_self_play_MCTS(net)
@@ -50,7 +54,5 @@ def self_play_MCTS(N, net, db : GoDatabase):
         print("number of moves {}".format(len(game_moves)))
         print("duration of total game creation : {}".format(time.time() - tmp_total))
 
-        # data.extend(game_moves)
-    # return data
 
     

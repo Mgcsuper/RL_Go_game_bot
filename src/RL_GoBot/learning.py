@@ -21,9 +21,6 @@ def get_optimizer(net, lr, wd, momentum):
 
 
 def train(net : GoBot, data_loader : DataLoader, optimizer : torch.optim.SGD, device='cuda:0'):
-  samples = 0.
-  cumulative_loss = 0.
-
 
   net.train() # Strictly needed if network contains layers which has different behaviours between train and test
   for batch_idx, (state, targets, reward) in enumerate(data_loader):
@@ -45,11 +42,3 @@ def train(net : GoBot, data_loader : DataLoader, optimizer : torch.optim.SGD, de
 
     # Update parameters
     optimizer.step()
-
-
-  #   # Better print something, no?
-  #   samples+=state.shape[0]
-  #   cumulative_loss += loss.item()
-  #   # _, predicted = outputs[:82].max(1)   # for the action which has been remembered
-
-  # return cumulative_loss/samples
