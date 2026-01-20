@@ -36,7 +36,6 @@ def one_self_play_MCTS(net : GoBot):
             tree.task_queue.put(None)
             worker.join()
 
-            
             MCTS_policy = tree.tree_policy()
             data_set.append([state, MCTS_policy])
         

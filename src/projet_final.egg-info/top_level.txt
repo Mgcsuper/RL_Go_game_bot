@@ -1,3 +1,4 @@
 RL_GoBot
+config
 demo
 gym_go

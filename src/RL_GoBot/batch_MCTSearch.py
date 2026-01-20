@@ -57,10 +57,8 @@ class Node:
 
     def __str__(self):
         print("___ node info ___")
-        print("action : {}".format(self.action_2d()))
-        # print("action : {} | depth : {}".format(self.action_2d(), self.depth))
-        # return "N : {}, P : {} \n".format(self.N, self.p)
-        return " "
+        print("action : {} | depth : {}".format(self.action_2d(), self.depth))
+        return "N : {}, P : {} \n".format(self.N, self.p)
 
 
 class MCTS:

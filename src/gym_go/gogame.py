@@ -21,13 +21,13 @@ The state of the game is a numpy array
 
 def init_state(size):
     # return initial board (numpy board)
-    state = np.zeros((govars.NUM_CHNLS, size, size))
+    state = np.zeros((govars.NUM_CHNLS, size, size), dtype=np.float32)
     return state
 
 
 def batch_init_state(batch_size, board_size):
     # return initial board (numpy board)
-    batch_state = np.zeros((batch_size, govars.NUM_CHNLS, board_size, board_size))
+    batch_state = np.zeros((batch_size, govars.NUM_CHNLS, board_size, board_size), dtype=np.float32)
     return batch_state
 
 
@@ -84,7 +84,7 @@ def next_state(state, action1d, canonical=False):
         # Set canonical form
         state = canonical_form(state)
 
-    return state
+    return state.astype(np.float32)
 
 
 def batch_next_states(batch_states, batch_action1d, canonical=False):
@@ -99,7 +99,7 @@ def batch_next_states(batch_states, batch_action1d, canonical=False):
     batch_prev_passed = batch_prev_player_passed(batch_states)
     batch_game_ended = np.nonzero(batch_prev_passed & (batch_action1d == pass_idx))
     batch_action2d = np.array([batch_action1d[batch_non_pass] // board_shape[0],
-                               batch_action1d[batch_non_pass] % board_shape[1]]).T
+                               batch_action1d[batch_non_pass] % board_shape[1]], dtype=np.int16).T
 
     batch_players = batch_turn(batch_states)
     batch_non_pass_players = batch_players[batch_non_pass]
@@ -153,7 +153,7 @@ def batch_next_states(batch_states, batch_action1d, canonical=False):
 def invalid_moves(state):
     # return a fixed size binary vector
     if game_ended(state):
-        return np.zeros(action_size(state))
+        return np.zeros(action_size(state), dtype=np.float32)
     return np.append(state[govars.INVD_CHNL].flatten(), 0)
 
 
@@ -164,7 +164,7 @@ def valid_moves(state):
 def batch_invalid_moves(batch_state):
     n = len(batch_state)
     batch_invalid_moves_bool = batch_state[:, govars.INVD_CHNL].reshape(n, -1)
-    batch_invalid_moves_bool = np.append(batch_invalid_moves_bool, np.zeros((n, 1)), axis=1)
+    batch_invalid_moves_bool = np.append(batch_invalid_moves_bool, np.zeros((n, 1), dtype=np.float32), axis=1)
     return batch_invalid_moves_bool
 
 
@@ -180,7 +180,7 @@ def children(state, canonical=False, padded=True):
     children = batch_next_states(batch_states, valid_move_idcs, canonical)
 
     if padded:
-        padded_children = np.zeros((n, *state.shape))
+        padded_children = np.zeros((n, *state.shape), dtype=np.float32)
         padded_children[valid_move_idcs] = children
         children = padded_children
     return children
@@ -247,7 +247,7 @@ def turn(state):
 
 
 def batch_turn(batch_state):
-    return np.max(batch_state[:, govars.TURN_CHNL], axis=(1, 2)).astype(np.int)
+    return np.max(batch_state[:, govars.TURN_CHNL], axis=(1, 2)).astype(np.int32)
 
 
 def liberties(state: np.ndarray):

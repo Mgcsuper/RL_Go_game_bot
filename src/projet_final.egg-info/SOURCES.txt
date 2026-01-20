@@ -1,8 +1,10 @@
 README.md
 pyproject.toml
+src/config.py
 src/demo.py
 src/RL_GoBot/MCTSearch.py
 src/RL_GoBot/__init__.py
+src/RL_GoBot/data_base.py
 src/RL_GoBot/game_creation.py
 src/RL_GoBot/learning.py
 src/RL_GoBot/model.py

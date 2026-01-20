@@ -25,3 +25,5 @@ def test_concecutive_push_search():
     root = MCTS(state, None, 1)
     for i in range(var.N_THRESHOLD + 3) :
         root.push_search()
+
+

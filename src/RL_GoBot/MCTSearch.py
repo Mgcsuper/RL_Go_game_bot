@@ -26,7 +26,7 @@ def roll_policy(state, net, prt = False):
             if torch.all(torch.tensor(state[3,:,:]) == 1):  # if there is no more legal mouves, the only move is pass
                 action = var.BOARD_SIZE**2      # pass move
             else :
-                result = net([state]).result[0]
+                result = net(state)[0].result
                 # print(result)
                 sorted_indices_actions = sorted(range(len(result)), key=lambda i: result[i])    # sort from the most willing move to play until the most unwilling move, by the actual policy
                 invalid_moves = gogame.invalid_moves(state)
@@ -110,7 +110,7 @@ class MCTS:
         next_state = node.next_state()
 
         # Prédiction du NN
-        result = self.net([next_state]).result[0]
+        result = self.net(next_state)[0].result
 
         # Mask des coups invalides et softmax
         invalid_moves = gogame.invalid_moves(next_state)  # contain also the pass move
@@ -138,7 +138,7 @@ class MCTS:
             MCTS.roll_policy_count += 1
             node.first_search = False
             next_state = node.next_state()
-            node.value = self.net(next_state).value
+            node.value = self.net(next_state)[0].value
             node.roll = roll_policy(next_state, self.net, prt)
             node.Q = (1 - var.QU_RATIO) * node.value + var.QU_RATIO * node.roll
         

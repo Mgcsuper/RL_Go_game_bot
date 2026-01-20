@@ -1,0 +1,330 @@
+
+ - new root - 
+ ___ node info ___
+action : None | depth : 0
+N : 100, P : 1
+- general tree time and process info -
+nomber of rollout :  52
+nomber of forward :  3864
+time for this move :  25.785908937454224
+- tree policy info -
+policy :  tensor([[29,  0,  0,  0,  0,  1,  0,  0,  0],
+        [ 0,  0,  0,  0,  0,  0,  1,  0,  0],
+        [ 0,  0,  0,  0,  0, 11,  1,  1,  0],
+        [ 4,  1,  0,  1,  0,  0,  0,  1,  0],
+        [ 0,  0,  0,  0,  0,  0,  0,  0,  1],
+        [ 0,  0,  0,  0,  9,  1,  0,  1,  1],
+        [ 1,  0,  0, 11,  0,  1,  1,  1,  1],
+        [ 0,  0,  1,  0,  1,  0,  0,  1,  1],
+        [ 1,  0,  0,  0,  1,  0,  1,  1,  1]])
+pass :  1
+r :  0.7233800889991472
+action :  (6, 7)
+
+ - new root - 
+ ___ node info ___
+action : (6, 7) | depth : 1
+N : 101, P : OutputFormating(0.0124)
+- general tree time and process info -
+nomber of rollout :  33
+nomber of forward :  2366
+time for this move :  16.713759183883667
+- tree policy info -
+policy :  tensor([[ 8,  0,  0,  0,  0,  1,  0,  0,  0],
+        [ 0,  0,  0,  0,  0,  0,  1,  0,  0],
+        [ 0,  0,  0,  0,  0,  0,  1, 13,  0],
+        [ 0,  0,  0,  5,  0,  0,  0,  0,  0],
+        [ 0,  0,  0,  0,  0,  0,  0,  0,  1],
+        [ 0,  0,  0,  0,  0,  6,  0,  0, 14],
+        [ 1,  0,  0,  0,  0,  1,  1,  0,  1],
+        [ 0,  0,  1,  0,  1,  0,  0,  1,  1],
+        [15,  0,  0,  0, 17,  0,  0,  1,  0]])
+pass :  0
+r :  0.44854489241645734
+action :  (5, 8)
+
+ - new root - 
+ ___ node info ___
+action : (5, 8) | depth : 2
+N : 114, P : OutputFormating(0.0137)
+- general tree time and process info -
+nomber of rollout :  32
+nomber of forward :  2379
+time for this move :  16.762689352035522
+- tree policy info -
+policy :  tensor([[ 6,  0,  0,  0,  0,  1,  0,  0,  0],
+        [ 0,  0,  0,  0,  0,  0,  1,  0,  0],
+        [ 0,  0,  0,  0,  0,  1,  5, 12,  0],
+        [ 0,  1,  0,  1,  0,  0,  0,  1,  0],
+        [ 0,  0,  0,  0,  0,  0,  0,  0,  1],
+        [ 0,  0,  0,  0,  1,  1,  0,  4,  0],
+        [15,  0,  0,  1,  0,  1,  1,  0, 11],
+        [ 0,  0,  1,  0, 10,  0,  0,  1,  1],
+        [ 7,  0,  0,  0,  1,  0,  0, 13,  1]])
+pass :  4
+r :  0.3383085420893942
+action :  (5, 4)
+
+ - new root - 
+ ___ node info ___
+action : (5, 4) | depth : 3
+N : 101, P : OutputFormating(0.0129)
+- general tree time and process info -
+nomber of rollout :  29
+nomber of forward :  2066
+time for this move :  14.630795240402222
+- tree policy info -
+policy :  tensor([[ 6,  0,  0,  0,  0, 12,  0,  0,  0],
+        [ 0,  0,  0,  0,  0,  0,  1,  0,  0],
+        [ 0,  0,  0,  0,  0,  0,  0,  1,  0],
+        [ 0,  0,  0,  0,  0,  0,  0,  0,  0],
+        [ 0,  0,  0,  0,  0,  0,  0,  0,  1],
+        [ 0,  0,  0,  0,  0,  5,  0,  0,  0],
+        [ 1,  0,  0,  0,  0,  3,  1,  0,  1],
+        [ 0,  0,  1,  0, 16,  0,  0,  5, 12],
+        [ 8,  0,  0,  0, 16,  0,  0,  1,  0]])
+pass :  0
+r :  0.17992274152053145
+action :  (1, 6)
+
+ - new root - 
+ ___ node info ___
+action : (1, 6) | depth : 4
+N : 101, P : OutputFormating(0.0137)
+- general tree time and process info -
+nomber of rollout :  58
+nomber of forward :  4150
+time for this move :  28.265665292739868
+- tree policy info -
+policy :  tensor([[ 1,  0,  1,  0,  1,  1,  1,  1,  0],
+        [ 0,  1,  0,  1,  0,  1,  0,  1,  1],
+        [ 4,  0,  1,  1,  0,  1,  1,  1,  0],
+        [13,  1,  0,  1,  1,  0,  1,  1,  0],
+        [ 1,  0,  0,  1,  0,  1,  0,  1,  1],
+        [ 0,  0,  0,  0,  0,  1, 12,  1,  0],
+        [ 1,  0,  1,  1,  1,  1,  1,  0,  1],
+        [ 1,  1,  1,  0,  1,  0,  1,  1,  1],
+        [ 1,  1,  0,  1,  1,  0,  1, 13,  1]])
+pass :  1
+r :  0.4020956444018857
+action :  (3, 6)
+
+ - new root - 
+ ___ node info ___
+action : (3, 6) | depth : 5
+N : 101, P : OutputFormating(0.0127)
+- general tree time and process info -
+nomber of rollout :  50
+nomber of forward :  3479
+time for this move :  24.10766911506653
+- tree policy info -
+policy :  tensor([[ 6,  0,  0,  0,  0,  7,  0,  0,  0],
+        [ 0,  0,  0,  0,  0,  0,  0,  0,  0],
+        [ 0,  0,  0,  0,  0,  5,  1,  1,  0],
+        [ 0,  0,  0,  1,  0,  0,  0,  0,  0],
+        [ 0,  0,  0,  0,  0,  0,  0,  0,  1],
+        [ 0,  0,  0,  0,  0,  1,  0,  0,  0],
+        [ 1,  0,  0,  4,  0,  1, 33,  0, 18],
+        [ 0,  0,  1,  0,  1,  0,  0,  5,  1],
+        [ 1,  0,  0,  0,  1,  0,  0,  1,  0]])
+pass :  0
+r :  0.38072985919547453
+action :  (6, 0)
+
+ - new root - 
+ ___ node info ___
+action : (6, 0) | depth : 6
+N : 101, P : OutputFormating(0.0145)
+- general tree time and process info -
+nomber of rollout :  42
+nomber of forward :  2963
+time for this move :  19.94568133354187
+- tree policy info -
+policy :  tensor([[ 1,  0,  1,  0,  1,  1,  0,  1,  0],
+        [ 0,  0,  0,  0,  0,  0,  0,  1,  0],
+        [ 0,  0,  0,  0,  0,  1,  1,  1,  0],
+        [ 5,  9,  0, 14,  0,  0,  0,  1,  0],
+        [ 1,  0,  0,  0,  0,  0,  0,  1,  1],
+        [ 0,  0,  0,  0,  0,  1,  0,  1,  0],
+        [ 0,  0,  0,  7,  0,  1,  1,  0,  1],
+        [ 1,  0, 12,  0,  1,  0,  0,  1,  1],
+        [ 1,  2,  0,  1,  1,  0,  1, 14,  1]])
+pass :  1
+r :  0.6958908509215584
+action :  (7, 2)
+
+ - new root - 
+ ___ node info ___
+action : (7, 2) | depth : 7
+N : 112, P : OutputFormating(0.0141)
+- general tree time and process info -
+nomber of rollout :  37
+nomber of forward :  2627
+time for this move :  17.350945711135864
+- tree policy info -
+policy :  tensor([[ 1,  0,  0,  0,  0,  5,  0,  0,  0],
+        [ 0,  0,  0,  0,  0,  0,  0,  0,  0],
+        [ 0,  0,  0,  0,  0,  4,  1, 13,  0],
+        [ 0,  1,  0,  4,  0,  0,  0,  1,  0],
+        [ 0,  0,  0,  0,  0,  0,  0,  0,  7],
+        [ 0,  0,  0,  0,  0,  1,  0,  3,  0],
+        [ 0,  0,  0,  4,  0,  4,  9,  0,  1],
+        [ 0,  0,  0,  0,  1,  0,  0,  1, 21],
+        [ 1,  0,  0,  0, 13,  0,  1,  1,  3]])
+pass :  1
+r :  0.15350438172645242
+action :  (2, 7)
+
+ - new root - 
+ ___ node info ___
+action : (2, 7) | depth : 8
+N : 113, P : OutputFormating(0.0146)
+- general tree time and process info -
+nomber of rollout :  35
+nomber of forward :  2685
+time for this move :  19.028279304504395
+- tree policy info -
+policy :  tensor([[ 6,  0,  1,  0,  3, 12,  0,  0,  0],
+        [ 0,  0,  0,  0,  0,  0,  0,  4,  0],
+        [ 0,  0,  0,  0,  0,  1,  1,  0,  0],
+        [ 1,  1,  0,  5,  0,  0,  0,  1,  0],
+        [ 1,  0,  0,  0,  0,  0,  0,  0,  1],
+        [ 0,  0,  0,  0,  0,  1,  0,  1,  0],
+        [ 0,  0,  0,  4,  0,  1,  1,  0, 12],
+        [ 4,  0,  0,  0,  8,  0,  0,  1, 12],
+        [ 1,  1,  0,  1, 13,  0,  1,  1,  1]])
+pass :  1
+r :  0.2482750298578087
+action :  (2, 6)
+
+ - new root - 
+ ___ node info ___
+action : (2, 6) | depth : 9
+N : 101, P : OutputFormating(0.0142)
+- general tree time and process info -
+nomber of rollout :  29
+nomber of forward :  2198
+time for this move :  16.355512857437134
+- tree policy info -
+policy :  tensor([[ 9,  0,  0,  0,  0,  1,  0,  0,  0],
+        [ 0,  0,  0,  0,  0,  0,  0,  0,  0],
+        [ 0,  0,  0,  0,  0,  6,  0,  0,  0],
+        [ 0,  4,  0,  1,  0,  0,  0,  3,  0],
+        [ 0,  0,  0,  0,  0,  0,  0,  0,  1],
+        [ 0,  0,  0,  0,  0,  1,  0,  5,  0],
+        [ 0,  0,  0,  5,  0,  1, 13,  0,  1],
+        [ 0,  0,  0,  0, 13,  0,  0,  1,  1],
+        [15,  0,  0,  0,  1,  0,  0,  1,  4]])
+pass :  4
+r :  0.5653542071224313
+action :  (6, 6)
+
+ - new root - 
+ ___ node info ___
+action : (6, 6) | depth : 10
+N : 113, P : OutputFormating(0.0149)
+- general tree time and process info -
+nomber of rollout :  41
+nomber of forward :  3052
+time for this move :  21.97174835205078
+- tree policy info -
+policy :  tensor([[ 1,  0,  4,  0,  4,  1,  3,  1,  0],
+        [ 0,  0,  0,  0,  0,  1,  0,  6,  1],
+        [ 0,  0,  0,  0,  0, 11,  0,  0,  0],
+        [ 1,  8,  0,  1,  0,  0,  0,  1,  0],
+        [ 1,  0,  0,  0,  0,  0,  0,  4,  1],
+        [ 0,  0,  0,  0,  0,  1,  1,  1,  0],
+        [ 0,  0,  1,  1,  0,  1,  0,  0,  1],
+        [ 5,  0,  0,  0, 12,  0,  3,  1,  1],
+        [ 1,  3,  0,  1, 15,  0,  1,  1,  1]])
+pass :  1
+r :  0.003987214788173099
+action :  (0, 0)
+
+ - new root - 
+ ___ node info ___
+action : (0, 0) | depth : 11
+N : 101, P : OutputFormating(0.0148)
+- general tree time and process info -
+nomber of rollout :  39
+nomber of forward :  2986
+time for this move :  21.81950092315674
+- tree policy info -
+policy :  tensor([[ 0,  0,  1,  0,  1,  1,  1,  1,  0],
+        [ 0,  0,  0,  0,  0,  1,  0,  1,  2],
+        [ 0,  0,  0,  0,  0, 10,  0,  0,  0],
+        [ 1,  1,  0, 11,  0,  0,  0,  1,  0],
+        [ 1,  0,  0,  0,  0,  1,  0,  1, 12],
+        [ 0,  0,  0,  0,  0,  1,  1,  1,  0],
+        [ 0,  0,  4,  6,  0,  1,  0,  0,  1],
+        [ 1,  0,  0,  0,  1,  0,  0,  1,  1],
+        [ 1,  1,  0,  1, 13,  0,  1,  1,  1]])
+pass :  5
+r :  0.9153262025016617
+action :  (8, 7)
+
+ - new root - 
+ ___ node info ___
+action : (8, 7) | depth : 12
+N : 101, P : OutputFormating(0.0154)
+- general tree time and process info -
+nomber of rollout :  37
+nomber of forward :  2836
+time for this move :  19.67929244041443
+- tree policy info -
+policy :  tensor([[ 0,  0,  1,  0,  0,  1,  0,  0,  0],
+        [ 0,  0,  0,  0,  0,  0,  0,  1,  0],
+        [ 0,  0,  0,  0,  0,  1,  0,  0,  0],
+        [ 1,  1,  0,  1,  0,  0,  0,  1,  0],
+        [ 1,  0,  0,  0,  0,  0,  0,  0,  7],
+        [ 0,  0,  0,  0,  0,  6,  0,  4,  0],
+        [ 0,  0,  3,  4,  0,  1,  0,  0, 14],
+        [ 3,  0,  0,  0, 11,  0,  0,  1, 19],
+        [ 1,  0,  0,  1,  1,  0,  1,  0,  4]])
+pass :  1
+r :  0.08302791388873887
+action :  (2, 5)
+
+ - new root - 
+ ___ node info ___
+action : (2, 5) | depth : 13
+N : 101, P : OutputFormating(0.0150)
+- general tree time and process info -
+nomber of rollout :  29
+nomber of forward :  2108
+time for this move :  14.846548557281494
+- tree policy info -
+policy :  tensor([[ 0,  0,  3,  0,  0,  8,  0,  0,  0],
+        [ 0,  0,  0,  0,  0,  0,  0,  1,  0],
+        [ 0,  0,  0,  0,  0,  0,  0,  0,  0],
+        [ 1,  4,  0,  6,  0,  0,  0,  4,  0],
+        [ 1,  0,  0,  0,  0,  0,  0,  0, 12],
+        [ 0,  0,  0,  0,  0,  1,  0,  1,  0],
+        [ 0,  0,  0,  5,  0,  1,  0,  0, 13],
+        [ 1,  0,  0,  0,  1,  0,  0,  1, 14],
+        [ 1,  0,  0,  0,  1,  0,  3,  0,  4]])
+pass :  4
+r :  0.12295780197954598
+action :  (1, 7)
+
+ - new root - 
+ ___ node info ___
+action : (1, 7) | depth : 14
+N : 101, P : OutputFormating(0.0147)
+- general tree time and process info -
+nomber of rollout :  29
+nomber of forward :  2075
+time for this move :  14.116140842437744
+- tree policy info -
+policy :  tensor([[ 0,  0,  3,  0,  0, 14,  0,  0,  0],
+        [ 0,  0,  0,  0,  0,  0,  0,  0,  0],
+        [ 0,  0,  0,  0,  0,  0,  0,  0,  0],
+        [ 3,  1,  0,  1,  0,  0,  0,  1,  0],
+        [ 1,  0,  0,  0,  0,  0,  0,  0,  1],
+        [ 0,  0,  0,  0,  0,  6,  0,  4,  0],
+        [ 0,  0,  2,  1,  0,  5,  0,  0, 13],
+        [ 1,  0,  0,  0, 11,  0,  0,  1,  1],
+        [ 8,  0,  0,  3,  1,  0,  1,  0,  4]])
+pass :  4
+r :  0.2579573116215057
+action :  (4, 0)

@@ -3,7 +3,7 @@ import time
 from math import sqrt
 import random
 from typing import List
-from multiprocessing import Pool, Semaphore
+from multiprocessing import Pool, Semaphore, pool
 
 from RL_GoBot.rollout import roll_policy, init_roll_policy
 from RL_GoBot.model import GoBot
@@ -118,7 +118,7 @@ class MCTS:
         self.back_prob(node, value, roll)
 
 
-    def push_search(self, node: Node, pool):
+    def push_search(self, node: Node, pool : pool.Pool):
         node.N += var.VIRTUAL_LOSS
         node.Wr -= 3
 
@@ -214,7 +214,6 @@ def init_push_search(model):
 
 
 def one_self_play_MCTS(net : GoBot):
-    net.eval()
     with torch.no_grad():
         data_set = []
         state = gogame.init_state(var.BOARD_SIZE)
