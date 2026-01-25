@@ -2,11 +2,12 @@ from RL_GoBot.data_base import GoDatabaseLMDB, GoDatabaseMongo
 from config import GAMES_DIR
 
 ORIGINE_DB = "batch"
-EPISODE = 3
+EPISODE = 0
 
-DESTINATION_GENERATION = f"generation_{EPISODE}" 
+DESTINATION_GENERATION = f"info_{EPISODE}" 
 
 lmdb = GoDatabaseLMDB(path=GAMES_DIR/ORIGINE_DB, db_name=DESTINATION_GENERATION)
+lmdb._open()
 
 with lmdb.env.begin() as txn:
     cursor = txn.cursor()

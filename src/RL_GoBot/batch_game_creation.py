@@ -3,7 +3,7 @@ import time
 
 import threading
 import queue
-
+ 
 from RL_GoBot.batch_MCTSearch import MCTS
 from RL_GoBot.batch_rollout import Continuos_Rollout
 from RL_GoBot.Node import Node
@@ -91,8 +91,8 @@ def one_game(tree:MCTS, roll_out_object:Continuos_Rollout, state) :
     moves_count = 0
     while not gogame.game_ended(state) and moves_count < var.MAX_TURNS:  
         ## print info
-        print("\n - new root - \n", tree)
-        tmp = time.time()
+        # print("\n - new root - \n", tree)
+        # tmp = time.time()
         ##
 
         # one_move tree creation
@@ -113,10 +113,10 @@ def one_game(tree:MCTS, roll_out_object:Continuos_Rollout, state) :
         moves_count += 1
 
         ## print info
-        print("- general tree time and process info -", flush=True)
-        print("nomber of rollout : ", tree.roll_policy_count, flush=True)
-        print("nomber of forward : real {} | equivalent roll {}, and extend {}".format(GoBot.forward_count, tree.roll_forward_count, tree.extend_count), flush=True)
-        print("time for this move : ", time.time() - tmp, flush=True)
+        # print("- general tree time and process info -", flush=True)
+        # print("nomber of rollout : ", tree.roll_policy_count, flush=True)
+        # print("nomber of forward : real {} | equivalent roll {}, and extend {}".format(GoBot.forward_count, tree.roll_forward_count, tree.extend_count), flush=True)
+        # print("time for this move : ", time.time() - tmp, flush=True)
 
         # debug and statistic variables
         tree.roll_policy_count = 0

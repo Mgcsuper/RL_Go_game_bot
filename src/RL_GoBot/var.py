@@ -10,6 +10,7 @@ N_TREE_SEARCH = 1000
 QU_RATIO = 0.5
 
 TEMPERATURE_MCTS = 1.6
+DATABASE_SIZE = 10000
 
 # MCTS parallele and batch variables
 MAX_PROCESSES = 1

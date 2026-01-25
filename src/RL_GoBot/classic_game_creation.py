@@ -9,7 +9,7 @@ from RL_GoBot import var
 
 from gym_go import gogame
 
-
+ 
 
 def one_self_play_MCTS(net):
     with torch.no_grad():
@@ -24,8 +24,10 @@ def one_self_play_MCTS(net):
             
             for _ in range(var.N_TREE_SEARCH) : 
                 tree.push_search(tree.root)
-            MCTS_policy = tree.tree_policy()
-            data_set.append([state, MCTS_policy])
+
+            MCTS_policy = torch.tensor(tree.tree_policy(), dtype=torch.float32)
+            tensor_state = torch.tensor(state, dtype=torch.float32)
+            data_set.append([tensor_state, MCTS_policy])
         
             print("- general tree time and process info -")
             print("nomber of rollout : ", MCTS.roll_policy_count)
@@ -39,7 +41,7 @@ def one_self_play_MCTS(net):
             MCTS.roll_policy_count = 0
             GoBot.forward_count = 0
 
-    reward = gogame.winning(state, var.KOMI)
+    reward = torch.tensor(gogame.winning(state, var.KOMI), dtype=torch.float32)
     for move in data_set:
         move.append(reward)
         reward = -reward

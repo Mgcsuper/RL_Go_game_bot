@@ -136,12 +136,12 @@ class MCTS:
         assert var.BOARD_SIZE**2 + 1 == np.count_nonzero(np.array(self.count_front) == np.array(self.count_back)), "a mismatch for the front push and for the backprop"
             
         ## print info
-        print("- Node selection info -")
-        print("Q of root : ", self.root.Q)
-        print("Wr of root : ", self.root.Wr)
-        print("Wv of root : ", self.root.Wv)
-        print("N of root : ", self.root.N)
-        self.affiche_policy()
+        # print("- Node selection info -")
+        # print("Q of root : ", self.root.Q)
+        # print("Wr of root : ", self.root.Wr)
+        # print("Wv of root : ", self.root.Wv)
+        # print("N of root : ", self.root.N)
+        # self.affiche_policy()
         ##
 
         if self.root.Wr/self.root.N < -0.98 :
@@ -153,7 +153,7 @@ class MCTS:
         for node in self.root.next_nodes:
             cumulative += self.policy[node.action]
             if cumulative > r:
-                print("action taken", node.action_2d())
+                # print("action taken", node.action_2d())
                 self.policy = None
                 return node
 

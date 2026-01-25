@@ -22,40 +22,19 @@ class GoDatabaseMongo(Dataset):
         self._len = len(self)
 
     def get_next_sequence(self):
-        id = ret["seq"]
-        ret = self.counters.find_one_and_update(
+        id = len(self)
+        self.counters.update_one(
             {"_id": self.collection_name},
             {"$inc": {"seq": 1}},
-            return_document=True
         )
         return id
 
-    def save_one_move(self, state : np.ndarray | list, policy : list, reward : float | np.float32):
-        if isinstance(state, np.ndarray):
-            print("____save_one_move____")
-            print(state.shape)
-            print(state.dtype)
-            print(state)
-            print("________")
-            state = state.tolist()
-        if isinstance(reward, np.generic):
-            print("____save_one_move____")
-            print(reward.shape)
-            print(reward.dtype)
-            print(reward)
-            print("________")
-            reward = float(reward)
-        if isinstance(reward, int):
-            print("____save_one_move____")
-            print(type(reward))
-            print(reward)
-            print("________")
-            reward = float(reward)
+    def save_one_move(self, state : torch.tensor, policy : torch.tensor, reward : torch.tensor):
         doc = {
             "_id": self.get_next_sequence(),
-            "state": state,
-            "policy": policy,
-            "reward": reward
+            "state": state.tolist(),
+            "policy": policy.tolist(),
+            "reward": reward.item(),
         }
         self.collection.insert_one(doc)
 
@@ -112,13 +91,17 @@ class GoDatabaseLMDB(Dataset):
             self.env = lmdb.open(str(self.path), map_size=self.map_size, max_dbs=50)
             self.db = self.env.open_db(self.db_name.encode("utf-8"))
             self.count_db = self.env.open_db(b'counter')
+            with self.env.begin(write=True, db=self.count_db) as txn:
+                self.length = txn.get(self.db_name.encode("utf-8"))
+                if self.length is None:
+                    self.length = 0
 
 
     def _save_one_move(self, move):  # need to be call by save_one_game()
         """
         save one move (state, policy, reward) in LMDB
         """
-        key = self.length.to_bytes(8, "big")  
+        key = len(self).to_bytes(8, "big")  
 
         buffer = io.BytesIO()
         torch.save(move, buffer)
@@ -137,7 +120,6 @@ class GoDatabaseLMDB(Dataset):
         self._open()
         for move in moves:
             self._save_one_move(move)
-
 
     def __len__(self):
         if self.length is None :

@@ -23,7 +23,7 @@ def one_self_play_MCTS(net : GoBot):
             
             print("\n - new root - \n", tree)
             tmp = time.time()
-            
+             
             tree.sem = Semaphore(var.MAX_PROCESSES)
             with Pool(processes=var.MAX_PROCESSES, initializer=init_roll_policy, initargs=(net,)) as pool:
                 for i in range(var.N_TREE_SEARCH) : 
@@ -33,8 +33,9 @@ def one_self_play_MCTS(net : GoBot):
                 pool.close()
                 pool.join()
             
-            MCTS_policy = tree.tree_policy()
-            data_set.append([state, MCTS_policy])
+            MCTS_policy = torch.tensor(tree.tree_policy(), dtype=torch.float32)
+            tensor_state = torch.tensor(state, dtype=torch.float32)
+            data_set.append([tensor_state, MCTS_policy])
         
             print("- general tree time and process info -", flush=True)
             print("nomber of rollout : ", MCTS.roll_policy_count, flush=True)
@@ -49,7 +50,7 @@ def one_self_play_MCTS(net : GoBot):
             MCTS.roll_policy_count = 0
             GoBot.forward_count = 0
 
-    reward = gogame.winning(state, var.KOMI)
+    reward = torch.tensor(gogame.winning(state, var.KOMI), dtype=torch.float32)
     for move in data_set:
         move.append(reward)
         reward = -reward
