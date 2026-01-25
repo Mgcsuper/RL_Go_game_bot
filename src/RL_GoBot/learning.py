@@ -34,7 +34,7 @@ def train(net : GoBot, data_loader : DataLoader, optimizer : torch.optim.SGD, de
 
     # Apply the loss
     loss = compute_loss(outputs, targets, reward)
-
+    
     optimizer.zero_grad()
 
     # Backward pass

@@ -1,0 +1,131 @@
+import numpy as np
+import torch 
+import time 
+import queue
+
+from RL_GoBot.batch_MCTSearch import Node, MCTS
+from RL_GoBot.model import GoBot
+from RL_GoBot import var
+
+
+from gym_go import gogame
+from gym_go import govars
+
+
+
+class Continuos_Rollout():
+    def __init__(self, tree : MCTS):
+        self.tree = tree        # for tree.net, tree.task_queue and tree.back_prop_leaf(node, value, roll, count)
+        self.batch_states = np.zeros((var.ROLL_BATCH_SIZE, govars.NUM_CHNLS, var.BOARD_SIZE, var.BOARD_SIZE), dtype=np.float32)
+        self.batch_size = var.ROLL_BATCH_SIZE
+        self.batchs_active = np.zeros((self.batch_size), dtype=bool)
+        self.batch_origine_node = np.empty(self.batch_size, dtype=Node)
+        self.batch_initial_turn = np.zeros((self.batch_size))   #gogame.batch_initial_turn(batch_states)
+        self.batch_game_move_count = np.zeros((self.batch_size))
+        self.batch_forward_count = np.zeros((self.batch_size), dtype=int)
+        self.batch_begining_values = np.zeros((self.batch_size))
+        self.batch_game_ended = np.zeros((self.batch_size))
+        self.first_roll = np.zeros((self.batch_size), dtype=bool)
+        self.end_tree_search = False
+        self.active_count = 0
+
+
+    def load_task(self):
+        tmp = time.time()
+        while self.active_count < var.ROLL_BATCH_SIZE and time.time() - tmp < var.MAX_WAIT_TIME and not self.end_tree_search : 
+            origine_node : Node
+            state : np.ndarray
+            try :
+                task  = self.tree.task_queue.get(timeout=0.001)      # task = (origini_node : Node, state : np.ndarray)
+            except queue.Empty:
+                task = False
+            
+            if task is None:
+                self.end_tree_search = True
+
+            elif task:
+                self.active_count += 1
+                (origine_node, state) = task
+                idx = np.argmax(self.batchs_active == 0)
+                self.batchs_active[idx] = True
+                self.batch_origine_node[idx] = origine_node
+                self.batch_states[idx] = state
+                self.batch_initial_turn[idx] = gogame.turn(state)
+                self.batch_game_move_count[idx] = origine_node.depth
+                self.batch_forward_count[idx] = 0
+                self.first_roll[idx] = True
+        return
+
+
+    def batch_one_rollout(self):
+        # print("batchs_active : ", self.batchs_active)
+        # print("move_count", self.batch_game_move_count)
+        batch_actions = - np.ones((self.batch_size)) # * var.BOARD_SIZE**2
+        # net batch forward
+        batch_net_output = self.tree.net(self.batch_states).numpy()
+        batch_values = batch_net_output[:,-1]
+        batch_net_policy = batch_net_output[:,:-1]
+        batch_invalid_moves = gogame.batch_invalid_moves(self.batch_states).astype(np.bool)
+
+        # register the value output of the net if it is the first move simulated by the rollout | or can use self.batch_forward_count == 0 as mask
+        self.batch_begining_values[self.first_roll] = batch_values[self.first_roll]
+        self.first_roll[:] = False
+
+        # print("batch_net_policy : ", batch_net_policy)
+
+        # creat batch_actions
+        batch_net_policy[batch_invalid_moves] = -float("inf")
+        batch_net_policy[~self.batchs_active] = -float("inf")
+        batch_actions[self.batchs_active] = np.argmax(batch_net_policy[self.batchs_active], axis=1)    
+
+        # print("batch_net_policy : ", batch_net_policy)
+        # print("batch_actions : ", batch_actions)    
+
+        # case the game has more then var.MAX_TURNS moves
+        batch_max_move = np.where(self.batch_game_move_count > var.MAX_TURNS + var.ROLL_OFFSET, True, False) 
+        batch_actions[batch_max_move] = var.BOARD_SIZE**2
+        # print("batch_actions : ", batch_actions)  
+
+        # next_state
+        self.batch_states[self.batchs_active] = gogame.batch_next_states(self.batch_states[self.batchs_active], batch_actions[self.batchs_active])
+        self.batch_game_move_count[self.batchs_active] += 1
+        self.batch_forward_count[self.batchs_active] += 1
+
+
+    def free(self):
+        for i in range(self.batch_size):
+            if self.batch_game_ended[i] and self.batchs_active[i]:
+                score = gogame.winning(self.batch_states[i], var.KOMI)  # from black perspective
+                # the turn of the first state of the rollout, correspond to the next_state(state, action) of the corresponding node.
+                # So if the initial turn is white, then the reward should stay for the black point of view because comming from a black node 
+                if not self.batch_initial_turn[i] :     
+                    score = - score
+                self.batchs_active[i] = False
+                self.active_count -= 1
+                self.tree.back_prop_leaf(self.batch_origine_node[i], self.batch_begining_values[i], score, self.batch_forward_count[i])
+
+
+    def continus_batch_roll_out(self):
+        with torch.no_grad():
+            self.tree.net.eval()
+            while (not self.end_tree_search) or (self.active_count != 0):
+                # batch creation
+                if not self.end_tree_search :
+                    # print("load")
+                    self.load_task()
+                        
+                # roll_out
+                self.batch_game_ended = gogame.batch_game_ended(self.batch_states)
+                if np.all(self.batch_game_ended[self.batchs_active] == 0):
+                    self.batch_one_rollout()
+                    
+                # if one of the rollout is ended, free the place 
+                else :
+                    self.free()
+            
+            assert self.active_count == 0, "the rollout wasn't finished"
+            assert self.end_tree_search, "the parent thread hasn't send the ending event in the queue"
+
+            self.end_tree_search = False
+            return
+        

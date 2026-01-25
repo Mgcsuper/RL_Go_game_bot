@@ -1,5 +1,5 @@
 from RL_GoBot import var
-from config import MODEL_DIR
+from config import MODEL_DIR_9X9
 import torch
 import numpy as np
 import os
@@ -46,7 +46,7 @@ class GoBot(torch.nn.Module):
     self.linear3 = torch.nn.Linear(110, var.BOARD_SIZE**2 + 2, bias=True) # 83 pour les 81 case possible le suivant pass et le dernier pour la valeur
 
 
-  def forward(self, entry : torch.Tensor | np.ndarray):
+  def forward(self, entry : torch.Tensor | np.ndarray) -> OutputFormating:
     ##--- reduse the 6 channel input of the environement that i have import to a 4 channel ---##
     if not isinstance(entry, torch.Tensor):
       entry = torch.from_numpy(entry)
@@ -83,12 +83,12 @@ class GoBot(torch.nn.Module):
   
 
   def save_model(self, file_name : str):
-     torch.save(self.state_dict(), MODEL_DIR/file_name)
+     torch.save(self.state_dict(), MODEL_DIR_9X9/file_name)
      return 
   
 
   def load_model(self, file_name : str):
-      path = MODEL_DIR/file_name
+      path = MODEL_DIR_9X9/file_name
       if os.path.exists(path):
           self.load_state_dict(torch.load(path))
       else :

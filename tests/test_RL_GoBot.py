@@ -1,6 +1,6 @@
 from RL_GoBot.model import GoBot
 from RL_GoBot import var
-from RL_GoBot.MCTSearch import roll_policy, MCTS
+from RL_GoBot.classic_MCTSearch import roll_policy, MCTS
 from gym_go.envs import go_env
 from gym_go import gogame
 
