@@ -1,22 +1,22 @@
 BOARD_SIZE = 9
 KOMI = 0.5
-MAX_TURNS = 100 # a bit plus then the total number of position to play
+MAX_TURNS = 30 # 100 # a bit plus then the total number of position to play
 ROLL_OFFSET = 20
 
 # MCTS variables
 C_PUCT = 5
 N_THRESHOLD = 15 
-N_TREE_SEARCH = 1000
+N_TREE_SEARCH = 30 # 1000
 QU_RATIO = 0.5
 
 TEMPERATURE_MCTS = 1.6
-DATABASE_SIZE = 10000
+DATABASE_SIZE = 100 # 10000
 
 # MCTS parallele and batch variables
 MAX_PROCESSES = 1
 VIRTUAL_LOSS = 3
 
-ROLL_BATCH_SIZE = 8
+ROLL_BATCH_SIZE = 16
 MAX_WAIT_TIME = 0.04
 MAX_QUEUE_SIZE = ROLL_BATCH_SIZE
 
