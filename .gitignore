@@ -1,3 +1,5 @@
 doc.txt
 prpt.txt
 data/game_moves
+__pycache__
+*test*.pth
