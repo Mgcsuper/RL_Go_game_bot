@@ -1,8 +1,12 @@
 import torch
-from RL_GoBot import var 
-from RL_GoBot.model import GoBot, OutputFormating
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Dataset
 import torch.nn.functional as F
+import math
+
+from RL_GoBot import var 
+from RL_GoBot.model import GoBot
+from RL_GoBot.data_base import get_data
+
 
 
 
@@ -20,7 +24,26 @@ def get_optimizer(net, lr, wd, momentum):
 
 
 
-def train(net : GoBot, data_loader : DataLoader, optimizer : torch.optim.SGD, device='cuda:0'):
+def test(net : GoBot, data_loader : DataLoader, device='cuda:0'):
+    with torch.no_grad():
+      net.eval()
+      cumulation_loss = 0
+      for batch_idx, (state, targets, reward) in enumerate(data_loader):
+          # Load data into GPU
+          state = state.to(device)
+          targets = targets.to(device)
+          reward = reward.to(device)
+
+          # Forward pass
+          outputs = net(state)
+
+          # Apply the loss
+          cumulation_loss += compute_loss(outputs, targets, reward)
+      return cumulation_loss
+      
+
+
+def train(net : GoBot, data_loader : DataLoader, optimizer : torch.optim.SGD, device='cuda:0', temperature=0):
 
   net.train() # Strictly needed if network contains layers which has different behaviours between train and test
   for batch_idx, (state, targets, reward) in enumerate(data_loader):
@@ -40,5 +63,38 @@ def train(net : GoBot, data_loader : DataLoader, optimizer : torch.optim.SGD, de
     # Backward pass
     loss.backward()
 
+    # applie some randomness in the grad
+    for p in net.parameters():
+      if p.grad is not None:
+          noise = torch.randn_like(p.grad) * temperature
+          p.grad += noise
+
     # Update parameters
     optimizer.step()
+
+    
+
+def train_one_episode(net : GoBot,
+                      db : Dataset,
+                      batch_size=var.BATCH_SIZE,
+                      device='cuda:0',
+                      learning_rate=var.LEARNING_RATE,
+                      temperature=0,
+                      weight_decay=var.L2_LOSS,
+                      momentum=var.MOMENTUM,
+                      epochs=var.EPOCHS):
+      '''
+      Input arguments
+      batch_size: Size of a mini-batch
+      device: GPU where you want to train your network
+      weight_decay: Weight decay co-efficient for regularization of weights
+      momentum: Momentum for SGD optimizer
+      epochs: Number of epochs for training the network
+      '''
+  
+      optimizer = get_optimizer(net, learning_rate, weight_decay, momentum)
+
+      for e in range(epochs):
+          print("epoch : ", e)
+          train_loader = get_data(db, batch_size)
+          train(net, train_loader, optimizer, device=device, temperature=temperature)

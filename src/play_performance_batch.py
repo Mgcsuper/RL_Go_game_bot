@@ -5,13 +5,14 @@ from gym_go import gogame
 
 from RL_GoBot import var
 from RL_GoBot.model import GoBot
-from RL_GoBot.batch_MCTSearch import MCTS, Node
+from RL_GoBot.Node import Node
+from RL_GoBot.batch_MCTSearch import MCTS
 from RL_GoBot.batch_game_creation import one_move_timed
 from RL_GoBot.batch_rollout import Continuos_Rollout
 
-MODEL_PATH_1 = "batch/generation_1.pth"
-MODEL_PATH_2 = "batch/generation_2.pth"
-REFLEXION_TIME = 3  # in second
+MODEL_PATH_1 = "batch/launch_generation_2.pth"
+MODEL_PATH_2 = "batch/launch_generation_10.pth"
+REFLEXION_TIME = 2  # in second
 MIN_TREE_PUSH = 100
 
 player_1 = GoBot()
@@ -40,10 +41,10 @@ while True:
     one_move_timed(tree_1, rollout_object_1, REFLEXION_TIME, MIN_TREE_PUSH)
     one_move_timed(tree_2, rollout_object_2)
     chosen_node = tree_1.best_next_node()
-    print("player_1 (black):\n", chosen_node)
     # resigne
     if chosen_node is None:
         break
+    print("player_1 (black):\n", chosen_node)
 
     # env update
     state, reward, done, info = env.step(chosen_node.action)
@@ -63,10 +64,10 @@ while True:
     one_move_timed(tree_2, rollout_object_2, REFLEXION_TIME, MIN_TREE_PUSH)
     one_move_timed(tree_1, rollout_object_1)
     chosen_node = tree_2.best_next_node()
-    print("player_2 (white):\n", chosen_node)
     # resigne
     if chosen_node is None:
         break
+    print("player_2 (white):\n", chosen_node)
 
     # env update
     state, reward, done, info = env.step(chosen_node.action)

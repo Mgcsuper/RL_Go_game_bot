@@ -43,8 +43,8 @@ def one_move_timed(tree:MCTS, roll_out_object:Continuos_Rollout, reflexion_time 
             # if there is a raise Excepetion in the child thread
             if worker.exc :
                 raise worker.exc 
-        print(time.time() - tmp)
-        print(i)
+        # print(time.time() - tmp)
+        # print(i)
     except KeyboardInterrupt :
         tree.task_queue.put(None)
         worker.join()
@@ -129,7 +129,7 @@ def one_game(tree:MCTS, roll_out_object:Continuos_Rollout, state) :
 
 
 
-def one_self_play_MCTS(net : GoBot):
+def one_self_play_MCTS(net : GoBot, temperature = var.TEMPERATURE_MCTS):
     # initialize most of the necessery objetcs, and creat a data_set for a game
     with torch.no_grad():
         net.eval()
@@ -137,7 +137,7 @@ def one_self_play_MCTS(net : GoBot):
         initial_state = gogame.init_state(var.BOARD_SIZE)
         root_node = Node(initial_state, None, 1, parent=None, depth=0, root=True)
         task_queue = queue.Queue(maxsize=var.MAX_QUEUE_SIZE)
-        tree = MCTS(net, root_node, task_queue)
+        tree = MCTS(net, root_node, task_queue, temperature)
         roll_out_object = Continuos_Rollout(tree)
 
         data_set, end_state, resigne = one_game(tree, roll_out_object, initial_state)

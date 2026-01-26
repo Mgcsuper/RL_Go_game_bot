@@ -1,21 +1,21 @@
 from RL_GoBot.data_base import GoDatabaseLMDB, GoDatabaseMongo
 from config import GAMES_DIR
+import lmdb
 
 ORIGINE_DB = "batch"
 EPISODE = 0
+MAP_SIZE = 100_000_000
 
-DESTINATION_GENERATION = f"info_{EPISODE}" 
+env = lmdb.open(str(GAMES_DIR/ORIGINE_DB), map_size=MAP_SIZE, max_dbs=50)
+count_db = env.open_db(b'counter')
 
-lmdb = GoDatabaseLMDB(path=GAMES_DIR/ORIGINE_DB, db_name=DESTINATION_GENERATION)
-lmdb._open()
-
-with lmdb.env.begin() as txn:
+with env.begin() as txn:
     cursor = txn.cursor()
     print("Clés dans la default DB (peuvent correspondre aux DBs nommées) :")
     for key, value in cursor:
         print(key) 
 
-with lmdb.env.begin(db=lmdb.count_db) as txn:
+with env.begin(db=count_db) as txn:
     cursor = txn.cursor()
     print("conteur :")
     for key, value in cursor:

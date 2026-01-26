@@ -8,15 +8,17 @@ from RL_GoBot import var
 from RL_GoBot.model import GoBot
 from RL_GoBot.classic_MCTSearch import MCTS, Node, action1d
 
+from config import MODEL_DIR_9X9
 
-MODEL_PATH_1 = "batch/generation_2.pth"
-MODEL_PATH_2 = "batch/generation_3.pth"
+TYPE = "batch"
+MODEL_PATH_1 = f"{TYPE}/launch_generation_0.pth"
+MODEL_PATH_2 = f"{TYPE}/launch_generation_1.pth"
 REFLEXION_TIME = 3  # in second
 
 player_1 = GoBot()
-player_1.load_model(MODEL_PATH_1)
+player_1.load_model(MODEL_DIR_9X9/MODEL_PATH_1)
 player_2 = GoBot()
-player_2.load_model(MODEL_PATH_2)
+player_2.load_model(MODEL_DIR_9X9/MODEL_PATH_2)
 
 env = go_env.GoEnv(size=var.BOARD_SIZE, komi=var.KOMI)
 init_node = Node(env.state(), None, 1)

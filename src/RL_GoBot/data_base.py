@@ -3,7 +3,6 @@ import lmdb
 import io
 from pathlib import Path
 
-import numpy as np
 from torch.utils.data import Dataset, DataLoader
 import torch
 
@@ -91,10 +90,7 @@ class GoDatabaseLMDB(Dataset):
             self.env = lmdb.open(str(self.path), map_size=self.map_size, max_dbs=50)
             self.db = self.env.open_db(self.db_name.encode("utf-8"))
             self.count_db = self.env.open_db(b'counter')
-            with self.env.begin(write=True, db=self.count_db) as txn:
-                self.length = txn.get(self.db_name.encode("utf-8"))
-                if self.length is None:
-                    self.length = 0
+            len(self)
 
 
     def _save_one_move(self, move):  # need to be call by save_one_game()
@@ -128,6 +124,8 @@ class GoDatabaseLMDB(Dataset):
                 length_bytes = txn.get(self.db_name.encode("utf-8"))
                 if length_bytes:
                     self.length = int.from_bytes(length_bytes, "big")
+                else:
+                    self.length = 0
 
         return self.length
     
@@ -163,6 +161,12 @@ class GoDatabaseLMDB(Dataset):
 
         with self.env.begin(db=self.count_db, write=True) as txn:
             txn.delete(self.db_name.encode("utf-8"))
+
+        with self.env.begin() as txn:
+            cursor = txn.cursor()
+            print("Clés dans la default DB (peuvent correspondre aux DBs nommées) :")
+            for key, value in cursor:
+                print(key) 
 
 
 

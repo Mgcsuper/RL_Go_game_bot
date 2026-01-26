@@ -3,48 +3,31 @@ import torch
 import time
 
 from RL_GoBot.model import GoBot
-from RL_GoBot.data_base import GoDatabaseLMDB, get_data
+from RL_GoBot.data_base import GoDatabaseLMDB
 from RL_GoBot.batch_game_creation import one_self_play_MCTS
-from RL_GoBot.learning import get_optimizer, train
+from RL_GoBot.learning import train_one_episode
 from RL_GoBot import var
 from config import MODEL_DIR_9X9, GAMES_DIR
 
 
 TYPE = "batch"
 MAX_PROCESSES = 8
+INIT_ID = 1
+
+TEMPERATURE_MCTS = var.TEMPERATURE_MCTS
+DECREACE_TEMPERATURE_MCTS = var.DECREACE_TEMPERATURE_MCTS
+LEARNING_RATE = var.LEARNING_RATE
+DECREACE_LEARNING_RATE = var.DECREACE_LEARNING_RATE
+MODEL_WEIGHT_TEMPERATURE = var.MODEL_WEIGHT_TEMPERATURE
+
 net = GoBot()
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-
-def train_one_episode(net : GoBot,
-                            db : GoDatabaseLMDB,
-                            batch_size=var.BATCH_SIZE,
-                            device='cuda',
-                            learning_rate=var.LEARNING_RATE,
-                            weight_decay=var.L2_LOSS,
-                            momentum=var.MOMENTUM,
-                            epochs=var.EPOCHS):
-            '''
-            Input arguments
-            batch_size: Size of a mini-batch
-            device: GPU where you want to train your network
-            weight_decay: Weight decay co-efficient for regularization of weights
-            momentum: Momentum for SGD optimizer
-            epochs: Number of epochs for training the network
-            '''
-        
-            optimizer = get_optimizer(net, learning_rate, weight_decay, momentum)
-
-            for e in range(epochs):
-                print("epoch : ", e)
-                train_loader = get_data(db, batch_size)
-                train(net, train_loader, optimizer, device)
 
 
 
 if __name__ == "__main__":
 
-    for ID in range(10):
+    for ID in range(INIT_ID, 10):
         GENERATION = f"launch_generation_{ID}" 
         EPISODE = f"launch_{ID}"
 
@@ -60,6 +43,7 @@ if __name__ == "__main__":
         # semaphore
         sem = Semaphore(MAX_PROCESSES)
 
+        # callback
         def callback(game_moves):
             sem.release()
             print("save one game Nb moves : ", len(game_moves))
@@ -68,13 +52,13 @@ if __name__ == "__main__":
 
         # sampling
         with Pool(processes=MAX_PROCESSES) as pool:
-            db_size = 0 
+            db_size = len(db)
             
-            while db_size < 5000 :
+            while db_size < var.DATABASE_SIZE :
                 sem.acquire()
-                pool.apply_async(one_self_play_MCTS, args=(net,), callback = callback) 
+                pool.apply_async(one_self_play_MCTS, args=(net, TEMPERATURE_MCTS * (DECREACE_TEMPERATURE_MCTS**ID)), callback = callback) 
                 db_size = len(db)
-
+            print("end sampling")
             pool.close()
             pool.join()
         
@@ -82,5 +66,10 @@ if __name__ == "__main__":
         # train
         print("training ...")
 
-        train_one_episode(net, db, device = device)
+        train_one_episode(net, 
+                          db, 
+                          device = device, 
+                          learning_rate=LEARNING_RATE * (DECREACE_LEARNING_RATE**ID), 
+                          temperature=MODEL_WEIGHT_TEMPERATURE*LEARNING_RATE * (DECREACE_LEARNING_RATE**(2*ID)))
+        
         net.save_model("{}/launch_generation_{}.pth".format(MODEL_DIR_9X9/TYPE, ID + 1))
