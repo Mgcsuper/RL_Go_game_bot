@@ -64,7 +64,7 @@ class GoDatabaseMongo(Dataset):
 
 
 class GoDatabaseLMDB(Dataset):
-    def __init__(self, path: str| Path, db_name: str, map_size: int = 100_000_000):
+    def __init__(self, path: str| Path, db_name: str, map_size: int = 1_000_000_000):
         """
         path : Path to the LMDB file
         map_size : max size of the LMDB (in bit)

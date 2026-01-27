@@ -4,7 +4,7 @@ import lmdb
 
 ORIGINE_DB = "batch"
 EPISODE = 0
-MAP_SIZE = 100_000_000
+MAP_SIZE = 1_000_000_000
 
 env = lmdb.open(str(GAMES_DIR/ORIGINE_DB), map_size=MAP_SIZE, max_dbs=50)
 count_db = env.open_db(b'counter')

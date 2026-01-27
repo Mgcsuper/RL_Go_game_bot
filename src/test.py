@@ -6,22 +6,15 @@ from RL_GoBot.data_base import GoDatabaseLMDB
 from config import GAMES_DIR, MODEL_DIR_9X9
 
 import torch
+import os
 
 TYPE = "batch"
-ID = 0
-GENERATION = f"test_{ID}" 
-EPISODE = f"launch_{ID}"       # a better name would be generation
 
 
+if os.path.exists("{}/launch_generation_{}.pth".format(MODEL_DIR_9X9/TYPE, 1)):
+    print("existe")
+else :
+    print("existe pas")
 
-bot = GoBot()
-bot.load_model("{}/{}.pth".format(MODEL_DIR_9X9/TYPE, GENERATION))
-
-db = GoDatabaseLMDB(path= GAMES_DIR/TYPE, db_name= EPISODE)    
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-train_one_episode(bot, db, device = device, temperature=(var.MODEL_WEIGHT_TEMPERATURE*var.LEARNING_RATE), epochs=3)
-
-bot.save_model("{}/test_{}.pth".format(MODEL_DIR_9X9/TYPE, ID+1))
 
 

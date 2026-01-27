@@ -1,6 +1,7 @@
 from multiprocessing import Pool, Semaphore
 import torch
 import time
+import os
 
 from RL_GoBot.model import GoBot
 from RL_GoBot.data_base import GoDatabaseLMDB
@@ -12,7 +13,7 @@ from config import MODEL_DIR_9X9, GAMES_DIR
 
 TYPE = "batch"
 MAX_PROCESSES = 8
-INIT_ID = 1
+INIT_ID = 0
 
 TEMPERATURE_MCTS = var.TEMPERATURE_MCTS
 DECREACE_TEMPERATURE_MCTS = var.DECREACE_TEMPERATURE_MCTS
@@ -66,10 +67,13 @@ if __name__ == "__main__":
         # train
         print("training ...")
 
-        train_one_episode(net, 
-                          db, 
-                          device = device, 
-                          learning_rate=LEARNING_RATE * (DECREACE_LEARNING_RATE**ID), 
-                          temperature=MODEL_WEIGHT_TEMPERATURE*LEARNING_RATE * (DECREACE_LEARNING_RATE**(2*ID)))
-        
-        net.save_model("{}/launch_generation_{}.pth".format(MODEL_DIR_9X9/TYPE, ID + 1))
+        if not os.path.exists("{}/launch_generation_{}.pth".format(MODEL_DIR_9X9/TYPE, ID + 1)):
+            train_one_episode(net, 
+                            db, 
+                            device = device, 
+                            learning_rate=LEARNING_RATE * (DECREACE_LEARNING_RATE**ID), 
+                            temperature=MODEL_WEIGHT_TEMPERATURE*LEARNING_RATE * (DECREACE_LEARNING_RATE**(2*ID)))
+            
+            net.save_model("{}/launch_generation_{}.pth".format(MODEL_DIR_9X9/TYPE, ID + 1))
+        else:
+            print("model already train and saved")
