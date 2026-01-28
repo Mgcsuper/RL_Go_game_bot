@@ -1,5 +1,7 @@
 from pathlib import Path
 import torch
+import multiprocessing
+
 
 # chemins
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -14,4 +16,7 @@ MODEL_DIR_9X9.mkdir(parents=True, exist_ok=True)
 
 # device
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-print(DEVICE)
+
+
+if multiprocessing.current_process().name == "MainProcess":
+    print(DEVICE)
