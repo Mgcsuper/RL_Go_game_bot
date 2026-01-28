@@ -45,10 +45,9 @@ class GoBot(torch.nn.Module):
         self.linear3 = torch.nn.Linear(110, var.BOARD_SIZE**2 + 2, bias=True) # 83 pour les 81 case possible le suivant pass et le dernier pour la valeur
 
 
-    def forward(self, entry : torch.Tensor | np.ndarray) -> OutputFormating:
+    def forward(self, entry : torch.Tensor) -> OutputFormating:
         ##--- reduse the 6 channel input of the environement that i have import to a 4 channel ---##
-        if not isinstance(entry, torch.Tensor):
-            entry = torch.from_numpy(entry)
+        assert isinstance(entry, torch.Tensor), "Error: input must be a torch.Tensor"
 
         if entry.ndim == 3: 
             entry = entry.unsqueeze(0)

@@ -6,6 +6,7 @@ import queue
 from RL_GoBot.batch_MCTSearch import Node, MCTS
 from RL_GoBot.model import GoBot
 from RL_GoBot import var
+from config import DEVICE
 
 
 from gym_go import gogame
@@ -62,7 +63,8 @@ class Continuos_Rollout():
         # print("move_count", self.batch_game_move_count)
         batch_actions = - np.ones((self.batch_size)) # * var.BOARD_SIZE**2
         # net batch forward
-        batch_net_output = self.tree.net(self.batch_states).numpy()
+        tensor_batch_states = torch.from_numpy(self.batch_states).to(DEVICE)
+        batch_net_output = self.tree.net(tensor_batch_states).detach().cpu().numpy()
         batch_values = batch_net_output[:,-1]
         batch_net_policy = batch_net_output[:,:-1]
         batch_invalid_moves = gogame.batch_invalid_moves(self.batch_states).astype(np.bool)
@@ -108,6 +110,7 @@ class Continuos_Rollout():
     def continus_batch_roll_out(self):
         with torch.no_grad():
             self.tree.net.eval()
+            self.tree.net.to(device=DEVICE)
             while (not self.end_tree_search) or (self.active_count != 0):
                 # batch creation
                 if not self.end_tree_search :

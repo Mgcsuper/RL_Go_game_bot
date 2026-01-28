@@ -8,7 +8,7 @@ from RL_GoBot.data_base import GoDatabaseLMDB
 from RL_GoBot.batch_game_creation import one_self_play_MCTS
 from RL_GoBot.learning import train_one_episode
 from RL_GoBot import var
-from config import MODEL_DIR_9X9, GAMES_DIR
+from config import MODEL_DIR_9X9, GAMES_DIR, DEVICE
 
 
 TYPE = "batch"
@@ -22,9 +22,7 @@ DECREACE_LEARNING_RATE = var.DECREACE_LEARNING_RATE
 MODEL_WEIGHT_TEMPERATURE = var.MODEL_WEIGHT_TEMPERATURE
 
 net = GoBot()
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-
+ 
 
 if __name__ == "__main__":
 
@@ -37,6 +35,7 @@ if __name__ == "__main__":
 
         # model load
         net.load_model("{}/{}.pth".format(MODEL_DIR_9X9/TYPE, GENERATION))
+        net.to(device=DEVICE)
 
         # data base conection
         db = GoDatabaseLMDB(path= GAMES_DIR/TYPE, db_name= EPISODE)    # db_name will be different for each of the generation of the bot learning
@@ -70,7 +69,6 @@ if __name__ == "__main__":
         if not os.path.exists("{}/launch_generation_{}.pth".format(MODEL_DIR_9X9/TYPE, ID + 1)):
             train_one_episode(net, 
                             db, 
-                            device = device, 
                             learning_rate=LEARNING_RATE * (DECREACE_LEARNING_RATE**ID), 
                             temperature=MODEL_WEIGHT_TEMPERATURE*LEARNING_RATE * (DECREACE_LEARNING_RATE**(2*ID)))
             

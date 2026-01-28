@@ -14,3 +14,4 @@ MODEL_DIR_9X9.mkdir(parents=True, exist_ok=True)
 
 # device
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+print(DEVICE)
