@@ -36,9 +36,7 @@ class MCTS:
 
         # Prédiction du NN
         input = torch.from_numpy(next_state).to(DEVICE)
-        result_ = self.net(input).result
-        result = result_[0]
-        print(result_)
+        result = self.net(input).result[0]
 
         # Mask des coups invalides et softmax
         invalid_moves = gogame.invalid_moves(next_state)  # contain also the pass move

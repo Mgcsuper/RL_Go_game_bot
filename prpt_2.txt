@@ -1,0 +1,18 @@
+def batch_invalid_moves(batch_state):
+    n = len(batch_state)
+    batch_invalid_moves_bool = batch_state[:, govars.INVD_CHNL].reshape(n, -1)
+    batch_invalid_moves_bool = np.append(batch_invalid_moves_bool, np.zeros((n, 1), dtype=np.float32), axis=1)
+    return batch_invalid_moves_bool
+
+batch_actions = - np.ones((self.batch_size)) # * var.BOARD_SIZE**2
+# net batch forward
+tensor_batch_states = torch.from_numpy(self.batch_states).to(DEVICE)
+batch_net_output = self.tree.net(tensor_batch_states).detach().cpu().numpy()
+batch_values = batch_net_output[:,-1]
+batch_net_policy = batch_net_output[:,:-1]
+batch_invalid_moves = gogame.batch_invalid_moves(self.batch_states).astype(np.bool)
+
+# creat batch_actions
+batch_net_policy[batch_invalid_moves] = -float("inf")
+batch_net_policy[~self.batchs_active] = -float("inf")
+batch_actions[self.batchs_active] = np.argmax(batch_net_policy[self.batchs_active], axis=1)    
