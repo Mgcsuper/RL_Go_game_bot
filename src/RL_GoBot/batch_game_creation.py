@@ -5,7 +5,7 @@ import threading
 import queue
  
 from RL_GoBot.batch_MCTSearch import MCTS
-from RL_GoBot.batch_rollout import Continuos_Rollout
+from RL_GoBot.batch_rollout_gpu import Continuos_Rollout
 from RL_GoBot.Node import Node
 from RL_GoBot.model import GoBot
 from RL_GoBot.data_base import GoDatabaseMongo

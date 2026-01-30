@@ -91,7 +91,7 @@ class Continuos_Rollout():
         # creat batch_actions
         gbatch_net_policy[gbatch_invalid_moves] = -float("inf")
         gbatch_net_policy[~self.gbatchs_active] = -float("inf")
-        gbatch_actions[self.gbatchs_active] = torch.argmax(gbatch_net_policy[self.gbatchs_active], dtype = torch.float32, dim=1)    
+        gbatch_actions[self.gbatchs_active] = torch.argmax(gbatch_net_policy[self.gbatchs_active], dim=1)    
 
         # print("batch_net_policy : ", batch_net_policy)
         # print("batch_actions : ", batch_actions)    

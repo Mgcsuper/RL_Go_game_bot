@@ -135,9 +135,9 @@ class MCTS:
         if self.policy is None:
             self.tree_policy()
 
-        print(self.count_front)
-        print(self.count_back)
-        print(np.count_nonzero(np.array(self.count_front) == np.array(self.count_back)))
+        # print(self.count_front)
+        # print(self.count_back)
+        # print(np.count_nonzero(np.array(self.count_front) == np.array(self.count_back)))
         assert var.BOARD_SIZE**2 + 1 == np.count_nonzero(np.array(self.count_front) == np.array(self.count_back)), "a mismatch for the front push and for the backprop"
             
         ## print info
