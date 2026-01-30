@@ -3,7 +3,6 @@ import random
 from math import sqrt
 import numpy as np
 
-
 import queue
 
 from RL_GoBot import var
@@ -11,6 +10,8 @@ from RL_GoBot.model import GoBot
 from RL_GoBot.Node import Node
 
 from gym_go import gogame
+
+from config import DEVICE
 
 
 
@@ -34,7 +35,10 @@ class MCTS:
         self.extend_count += 1
 
         # Prédiction du NN
-        result = self.net(torch.from_numpy(next_state)).result[0]
+        input = torch.from_numpy(next_state).to(DEVICE)
+        result_ = self.net(input).result
+        result = result_[0]
+        print(result_)
 
         # Mask des coups invalides et softmax
         invalid_moves = gogame.invalid_moves(next_state)  # contain also the pass move
