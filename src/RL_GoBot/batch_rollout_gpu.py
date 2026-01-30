@@ -117,6 +117,7 @@ class Continuos_Rollout():
                 if self.batch_initial_turn[i] :     
                     score = - score
                 self.batchs_active[i] = False
+                self.gbatchs_active[i] = False
                 self.active_count -= 1
                 self.tree.back_prop_leaf(self.batch_origine_node[i], self.batch_begining_values[i], score, self.batch_forward_count[i])
 
