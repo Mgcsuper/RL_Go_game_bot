@@ -117,6 +117,7 @@ def one_game(tree:MCTS, roll_out_object:Continuos_Rollout, state) :
         # print("nomber of rollout : ", tree.roll_policy_count, flush=True)
         # print("nomber of forward : real {} | equivalent roll {}, and extend {}".format(GoBot.forward_count, tree.roll_forward_count, tree.extend_count), flush=True)
         # print("time for this move : ", time.time() - tmp, flush=True)
+        ##
 
         # debug and statistic variables
         tree.roll_policy_count = 0
@@ -175,6 +176,10 @@ def self_play_MCTS(N, net : GoBot, db : GoDatabaseMongo):    # obliged when play
 
 
 if __name__ == "__main__":
-
+    var.N_TREE_SEARCH = 30
     net = GoBot()
-    one_self_play_MCTS(net)
+    data = one_self_play_MCTS(net)
+    for i in range(len(data)) :
+        print(f"__{i}__")
+        print(gogame.str(data[i][0].numpy()))
+        print(data[i][2])

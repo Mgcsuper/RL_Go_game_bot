@@ -1,6 +1,4 @@
 from multiprocessing import Pool, Semaphore
-import torch
-import time
 import os
 
 from RL_GoBot.model import GoBot
@@ -20,6 +18,7 @@ DECREACE_TEMPERATURE_MCTS = var.DECREACE_TEMPERATURE_MCTS
 LEARNING_RATE = var.LEARNING_RATE
 DECREACE_LEARNING_RATE = var.DECREACE_LEARNING_RATE
 MODEL_WEIGHT_TEMPERATURE = var.MODEL_WEIGHT_TEMPERATURE
+
 
 net = GoBot()
  

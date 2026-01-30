@@ -52,6 +52,11 @@ class Node:
 
     def __str__(self):
         print("___ node info ___")
+        if gogame.turn(self.state) == 1:
+            print("Black after action taken of this node")
+        else :
+            print("white after action taken of this node")
+
         print("action : {} | depth : {}".format(self.action_2d(), self.depth))
         return "N : {}, P : {} \n".format(self.N, self.p)
 

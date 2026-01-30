@@ -1,20 +1,28 @@
+import time
+from concurrent.futures import ThreadPoolExecutor
+import threading
 
-from RL_GoBot import var
-from RL_GoBot.model import GoBot
-from RL_GoBot.learning import train_one_episode
-from RL_GoBot.data_base import GoDatabaseLMDB
-from config import GAMES_DIR, MODEL_DIR_9X9
+# Semaphore pour limiter le nombre de tâches simultanées
+sem = threading.Semaphore(5)
 
-import torch
-import os
+def gpu_task(x):
+    print(f"Processing {x}")
+    time.sleep(2)  # simule un calcul sur GPU
+    return x * x
 
-TYPE = "batch"
+def callback(future):
+    # sem.release()
+    print("callback")
+    result = future.result()  # récupère le résultat
+    print(f"Task finished with result: {result}")
 
+# Thread pool
+with ThreadPoolExecutor(max_workers=3) as executor:
+    for i in range(10):
+        # sem.acquire()
+        print(i)
+        future = executor.submit(gpu_task, i)
+        future.add_done_callback(callback)  # exécute le callback dès que terminé
 
-if os.path.exists("{}/launch_generation_{}.pth".format(MODEL_DIR_9X9/TYPE, 1)):
-    print("existe")
-else :
-    print("existe pas")
-
-
-
+print("All tasks submitted, main thread is free to do other work")
+time.sleep(5)  # juste pour garder le script ouvert pour voir les callbacks

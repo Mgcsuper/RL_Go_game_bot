@@ -34,7 +34,7 @@ class MCTS:
         self.extend_count += 1
 
         # Prédiction du NN
-        result = self.net(next_state).result[0]
+        result = self.net(torch.from_numpy(next_state)).result[0]
 
         # Mask des coups invalides et softmax
         invalid_moves = gogame.invalid_moves(next_state)  # contain also the pass move
@@ -144,7 +144,7 @@ class MCTS:
         # self.affiche_policy()
         ##
 
-        if self.root.Wr/self.root.N < -0.98 :
+        if self.root.Wr/self.root.N < -0.95 :
             print("resigne")
             return None
 

@@ -3,6 +3,8 @@ import queue
 from gym_go.envs import go_env
 from gym_go import gogame
 
+from config import MODEL_DIR_9X9
+
 from RL_GoBot import var
 from RL_GoBot.model import GoBot
 from RL_GoBot.Node import Node
@@ -10,8 +12,8 @@ from RL_GoBot.batch_MCTSearch import MCTS
 from RL_GoBot.batch_game_creation import one_move_timed
 from RL_GoBot.batch_rollout import Continuos_Rollout
 
-MODEL_PATH_1 = "batch/launch_generation_2.pth"
-MODEL_PATH_2 = "batch/launch_generation_10.pth"
+MODEL_PATH_1 = MODEL_DIR_9X9/"batch/launch_generation_1.pth"
+MODEL_PATH_2 = MODEL_DIR_9X9/"batch/launch_generation_6.pth"
 REFLEXION_TIME = 2  # in second
 MIN_TREE_PUSH = 100
 

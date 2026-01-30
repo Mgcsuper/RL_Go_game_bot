@@ -99,8 +99,8 @@ class Continuos_Rollout():
             if self.batch_game_ended[i] and self.batchs_active[i]:
                 score = gogame.winning(self.batch_states[i], var.KOMI)  # from black perspective
                 # the turn of the first state of the rollout, correspond to the next_state(state, action) of the corresponding node.
-                # So if the initial turn is white, then the reward should stay for the black point of view because comming from a black node 
-                if not self.batch_initial_turn[i] :     
+                # Sinci it's the player of this next_state that should take the reward, if it is black the reward don't change
+                if self.batch_initial_turn[i] :     
                     score = - score
                 self.batchs_active[i] = False
                 self.active_count -= 1
