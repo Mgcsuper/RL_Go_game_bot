@@ -5,8 +5,8 @@ from config import MODEL_DIR_9X9, GAMES_DIR
 
 TYPE = "batch"
 ID = 0
-GENERATION = f"generation_{ID}" 
-EPISODE = f"episode_{ID}"
+GENERATION = f"launch_generation_{ID}" 
+EPISODE = f"launch_{ID}"
 
 # model load
 net = GoBot()
