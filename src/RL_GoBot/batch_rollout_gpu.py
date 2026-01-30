@@ -28,7 +28,7 @@ class Continuos_Rollout():
         self.batch_states = np.zeros((var.ROLL_BATCH_SIZE, govars.NUM_CHNLS, var.BOARD_SIZE, var.BOARD_SIZE), dtype=np.float32)
         self.batchs_active = np.zeros((self.batch_size), dtype=bool)
                                           
-        self.first_roll = np.zeros((self.batch_size), dtype=torch.bool)
+        self.first_roll = np.zeros((self.batch_size), dtype=bool)
         self.batch_begining_values = np.zeros((self.batch_size))
         self.batch_origine_node = np.empty(self.batch_size, dtype=Node)
         self.batch_initial_turn = np.zeros((self.batch_size))   #gogame.batch_initial_turn(batch_states)
@@ -70,7 +70,7 @@ class Continuos_Rollout():
     def batch_one_rollout(self):
         # print("batchs_active : ", self.batchs_active)
         # print("move_count", self.batch_game_move_count)
-        gbatch_actions = - torch.ones((self.batch_size), device=DEVICE) # * var.BOARD_SIZE**2
+        gbatch_actions = - torch.ones((self.batch_size), dtype=torch.long, device=DEVICE) # * var.BOARD_SIZE**2
         self.gbatch_states = torch.from_numpy(self.batch_states).to(DEVICE)
 
         # net batch forward
@@ -91,7 +91,7 @@ class Continuos_Rollout():
         # creat batch_actions
         gbatch_net_policy[gbatch_invalid_moves] = -float("inf")
         gbatch_net_policy[~self.gbatchs_active] = -float("inf")
-        gbatch_actions[self.gbatchs_active] = torch.argmax(gbatch_net_policy[self.gbatchs_active], dim=1)    
+        gbatch_actions[self.gbatchs_active] = torch.argmax(gbatch_net_policy[self.gbatchs_active], dtype = torch.float32, dim=1)    
 
         # print("batch_net_policy : ", batch_net_policy)
         # print("batch_actions : ", batch_actions)    
@@ -102,7 +102,7 @@ class Continuos_Rollout():
         # print("batch_actions : ", batch_actions)  
 
         # next_state
-        batch_actions = gbatch_actions[self.gbatchs_active].detach.cpu().numpy()
+        batch_actions = gbatch_actions[self.gbatchs_active].detach().cpu().numpy()
         self.batch_states[self.batchs_active] = gogame.batch_next_states(self.batch_states[self.batchs_active], batch_actions)
         self.gbatch_game_move_count[self.gbatchs_active] += 1
         self.batch_forward_count[self.batchs_active] += 1
