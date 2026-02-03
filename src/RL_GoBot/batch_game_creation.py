@@ -5,7 +5,7 @@ import threading
 import queue
  
 from RL_GoBot.batch_MCTSearch import MCTS
-from RL_GoBot.batch_rollout_gpu import Continuos_Rollout
+from RL_GoBot.batch_rollout import Continuos_Rollout
 from RL_GoBot.Node import Node
 from RL_GoBot.model import GoBot
 from RL_GoBot.data_base import GoDatabaseMongo
@@ -90,10 +90,10 @@ def one_game(tree:MCTS, roll_out_object:Continuos_Rollout, state) :
     data_set = []   # list of move, a move being a list of 3 tensor : (state, policy, reward)
     moves_count = 0
     while not gogame.game_ended(state) and moves_count < var.MAX_TURNS:  
-        ## print info
-        # print("\n - new root - \n", tree)
-        # tmp = time.time()
-        ##
+        # print info
+        print("\n - new root - \n", tree)
+        tmp = time.time()
+        #
 
         # one_move tree creation
         one_move_counted(tree, roll_out_object)
@@ -112,12 +112,12 @@ def one_game(tree:MCTS, roll_out_object:Continuos_Rollout, state) :
         state = next_state
         moves_count += 1
 
-        ## print info
-        # print("- general tree time and process info -", flush=True)
-        # print("nomber of rollout : ", tree.roll_policy_count, flush=True)
-        # print("nomber of forward : real {} | equivalent roll {}, and extend {}".format(GoBot.forward_count, tree.roll_forward_count, tree.extend_count), flush=True)
-        # print("time for this move : ", time.time() - tmp, flush=True)
-        ##
+        # print info
+        print("- general tree time and process info -", flush=True)
+        print("nomber of rollout : ", tree.roll_policy_count, flush=True)
+        print("nomber of forward : real {} | equivalent roll {}, and extend {}".format(GoBot.forward_count, tree.roll_forward_count, tree.extend_count), flush=True)
+        print("time for this move : ", time.time() - tmp, flush=True)
+        #
 
         # debug and statistic variables
         tree.roll_policy_count = 0
@@ -176,10 +176,12 @@ def self_play_MCTS(N, net : GoBot, db : GoDatabaseMongo):    # obliged when play
 
 
 if __name__ == "__main__":
+    from config import DEVICE
+    DEVICE = 'cpu' # 'cuda'
     var.N_TREE_SEARCH = 30
     net = GoBot()
     data = one_self_play_MCTS(net)
-    for i in range(len(data)) :
-        print(f"__{i}__")
-        print(gogame.str(data[i][0].numpy()))
-        print(data[i][2])
+    # for i in range(len(data)) :
+    #     print(f"__{i}__")
+    #     print(gogame.str(data[i][0].numpy()))
+    #     print(data[i][2])
