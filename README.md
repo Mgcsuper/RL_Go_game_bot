@@ -1,110 +1,64 @@
+
 # About
-An environment for the board game Go. It is implemented using OpenAI's Gym API. 
-It is also optimized to be as efficient as possible in order to efficiently train ML models.
+A Go game bot using a self-updated version of the **GymGo** environment based on the following repository:  
+[GymGo](https://github.com/huangeddie/GymGo)
+
+The overall strategy consists of:
+1. Sampling games using the most recent generation of the AI model with MCTS  
+2. Training the same model on the sampled games  
+
+The long-term objective is to reach a strength of **50**.
+
+For each generation, we reduce:
+- the learning rate  
+- the weight temperature used during training  
+- the MCTS temperature  
+
+There are three versions of the game-sampling algorithm. The **batch** version is the most efficient one, so it is used everywhere.
+
+---
 
 # Installation
+
+Clone the repository and then:
+
 ```bash
 # In the root directory
-pip install -e .
+pip install uv
+uv sync
 ```
 
-# API
+# Run the code
 
-### Coding example
-```python
-import gym
-
-go_env = gym.make('gym_go:go-v0', size=7, komi=0, reward_method='real')
-
-first_action = (2,5)
-second_action = (5,2)
-state, reward, done, info = go_env.step(first_action)
-go_env.render('terminal')
-```
-
-```
-     0 1 2 3 4 5 6 
-0    ╔═╤═╤═╤═╤═╤═╗
-1    ╟─┼─┼─┼─┼─┼─╢
-2    ╟─┼─┼─┼─┼─○─╢
-3    ╟─┼─┼─┼─┼─┼─╢
-4    ╟─┼─┼─┼─┼─┼─╢
-5    ╟─┼─┼─┼─┼─┼─╢
-6    ╚═╧═╧═╧═╧═╧═╝
-     Turn: WHITE, Game State (ONGOING|PASSED|END): ONGOING
-     Black Area: 49, White Area: 0
-```
-
-```python
-state, reward, done, info = go_env.step(second_action)
-go_env.render('terminal')
-```
-
-```
-	0 1 2 3 4 5 6 
-0	╔═╤═╤═╤═╤═╤═╗
-1	╟─┼─┼─┼─┼─┼─╢
-2	╟─┼─┼─┼─┼─○─╢
-3	╟─┼─┼─┼─┼─┼─╢
-4	╟─┼─┼─┼─┼─┼─╢
-5	╟─┼─●─┼─┼─┼─╢
-6	╚═╧═╧═╧═╧═╧═╝
-	Turn: BLACK, Game State (ONGOING|PASSED|END): ONGOING
-	Black Area: 1, White Area: 1
-```
-
-### UI example
 ```bash
-# In the root directory.
-# Defaults to a uniform random AI opponent.
-python3 demo.py
+# to run any file
+uv run python file_name.py
 ```
-![alt text](screenshots/human_ui.png)
 
-### High level API
-[GoEnv](gym_go/envs/go_env.py) defines the Gym environment for Go. 
-It contains the highest level API for basic Go usage.  
 
-### Low level API
-[GoGame](gym_go/gogame.py) is the set of low-level functions that defines all the game logic of Go.
-`GoEnv`'s high level API is built on `GoGame`.
-These sets of functions are intended for a more detailed and finetuned 
-usage of Go.
+# Folders Description
 
-# Scoring
-We use Trump Taylor scoring, a simple area scoring, to determine the winner. A player's _area_ is defined as the number of empty points a 
-player's pieces surround plus the number of player's pieces on the board. The _winner_ is the player with the larger 
-area (a game is tied if both players have an equal amount of area on the board).
+### Data
+This folder is used for storing the bot model weights in the `model` folder.  
+Game moves sampled in each generation are stored in the `game_moves` folder.  
+The most efficient version of the code is the batch version, so the model and the game moves are stored in the `batch` subfolder.
 
-There is also support for `komi`, a bias score constant to balance the advantage of black going first. 
-By default `komi` is set to 0.
+### src
+#### gym_go
+The Go game environment imported from the GymGo repository.
 
-# Game ending
-A game ends when both players pass consecutively
+#### RL_GoBot
+Source code for the entire project:  
+- `model.py` : defines the model architecture.  
+- `Node.py` : tree nodes for the MCTS.  
+- `MCTSearch.py` : the tree algorithm itself, including push search, rollout backpropagation, and tree expansion methods.  
+- `game_creation.py` : manages the tree, the database, and the AI model used for sampling a game.  
+- `data_base.py` : database classes.  
+- `rollout.py` : executes the rollout of the policy (here, the AI model itself) from a leaf node of the MCTS to a terminal game state, including resignations.  
 
-# Reward methods
-Reward methods are in _black_'s perspective
-* **Real**:
-  * If game ended:
-    * `-1` - White won
-    * `0` - Game is tied
-    * `1` - Black won
-  * `0` - Otherwise
-* **Heuristic**: If the game is ongoing, the reward is `black area - white area`. 
-If black won, the reward is `BOARD_SIZE**2`. 
-If white won, the reward is `-BOARD_SIZE**2`.
-If tied, the reward is `0`.
+Files prefixed with `batch_` represent the most efficient way to sample a game.
 
-# State
-The `state` object that is returned by the `reset` and `step` functions of the environment is a 
-`6 x BOARD_SIZE x BOARD_SIZE` numpy array. All values in the array are either `0` or `1` 
-* **First and second channel:** represent the black and white pieces respectively.
-* **Third channel:** Indicator layer for whose turn it is 
-* **Fourth channel:** Invalid moves (including ko-protection) for the next action
-* **Fifth channel:** Indicator layer for whether the previous move was a pass
-* **Sixth channel:** Indicator layer for whether the game is over
-
-# Action
-The `step` function takes in the action to execute and can be in the following forms:
-* a tuple/list of 2 integers representing the row and column or `None` for passing
-* a single integer representing the action in 1d space (i.e 9 would be (1,2) and 49 would be a pass for a 7x7 board)
+#### Higher-Level Files
+- To play against a specific generation bot, use `play.py`.  
+- To create your own trained model, use `launcher_sample_train_PC.py` (training several generations can take several days).  
+- To make different generations play against each other, use `play_performance_batch.py`.

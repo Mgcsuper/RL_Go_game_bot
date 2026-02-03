@@ -90,10 +90,10 @@ def one_game(tree:MCTS, roll_out_object:Continuos_Rollout, state) :
     data_set = []   # list of move, a move being a list of 3 tensor : (state, policy, reward)
     moves_count = 0
     while not gogame.game_ended(state) and moves_count < var.MAX_TURNS:  
-        # print info
+        ## print info
         print("\n - new root - \n", tree)
         tmp = time.time()
-        #
+        ##
 
         # one_move tree creation
         one_move_counted(tree, roll_out_object)
@@ -112,12 +112,12 @@ def one_game(tree:MCTS, roll_out_object:Continuos_Rollout, state) :
         state = next_state
         moves_count += 1
 
-        # print info
+        ## print info
         print("- general tree time and process info -", flush=True)
         print("nomber of rollout : ", tree.roll_policy_count, flush=True)
         print("nomber of forward : real {} | equivalent roll {}, and extend {}".format(GoBot.forward_count, tree.roll_forward_count, tree.extend_count), flush=True)
         print("time for this move : ", time.time() - tmp, flush=True)
-        #
+        ##
 
         # debug and statistic variables
         tree.roll_policy_count = 0
